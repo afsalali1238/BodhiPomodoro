@@ -7,7 +7,6 @@
 const { spawn, execFile, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 
 /**
  * @typedef {Object} ActiveWindowSample
@@ -128,7 +127,14 @@ const { app } = require('electron');
 function getNativeBinary() {
   if (process.platform !== 'win32') return null;
   const targetDir = path.join(app ? app.getPath('userData') : process.cwd(), 'bin');
-  try { if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true }); } catch {}
+  try {
+    if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+  } catch (e) {
+    // If this directory truly can't be created, compilation below will fail
+    // too and we fall back to the PowerShell watcher — but log it so a
+    // permissions issue isn't a total mystery.
+    console.warn(`[watcher] Could not create ${targetDir}:`, e.message);
+  }
   const exePath = path.join(targetDir, 'bodhi-watcher.exe');
 
   if (fs.existsSync(exePath)) return exePath;
@@ -144,7 +150,12 @@ function getNativeBinary() {
     const csFile = path.join(targetDir, 'BodhiWatcher.cs');
     fs.writeFileSync(csFile, CS_SOURCE, 'utf8');
     execFileSync(csc, ['/nologo', '/optimize', '/target:exe', `/out:${exePath}`, csFile], { windowsHide: true, timeout: 15000 });
-    try { fs.unlinkSync(csFile); } catch {}
+    try {
+      fs.unlinkSync(csFile);
+    } catch (cleanupErr) {
+      // Leftover .cs source file is harmless; just note it.
+      console.warn(`[watcher] Could not remove temporary source file ${csFile}:`, cleanupErr.message);
+    }
     if (fs.existsSync(exePath)) return exePath;
   } catch (e) {
     console.warn('[watcher] Native compilation fallback:', e.message);
@@ -175,7 +186,12 @@ function startWatcher(onSample, onError) {
       if (!line) continue;
       try {
         onSample(JSON.parse(line));
-      } catch {}
+      } catch {
+        // Intentionally silent: a line can legitimately be malformed if the
+        // watcher process was killed mid-write, or if a window title contains
+        // characters the escaper missed. This runs multiple times per second,
+        // so we don't log here to avoid spamming stderr.
+      }
     }
   };
 
@@ -185,7 +201,11 @@ function startWatcher(onSample, onError) {
       child = spawn(nativeExe, [], { windowsHide: true });
     } else {
       const targetDir = path.join(app ? app.getPath('userData') : process.cwd(), 'bin');
-      try { if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true }); } catch {}
+      try {
+        if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
+      } catch (e) {
+        console.warn(`[watcher] Could not create ${targetDir}:`, e.message);
+      }
       const psFile = path.join(targetDir, 'bodhi-watcher.ps1');
       fs.writeFileSync(psFile, PS_SOURCE, 'utf8');
       child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', psFile],
@@ -207,7 +227,11 @@ function startWatcher(onSample, onError) {
     available: true,
     stop() {
       stopped = true;
-      try { if (child) child.kill(); } catch {}
+      try {
+        if (child) child.kill();
+      } catch {
+        // The child process may have already exited; killing it again is a no-op.
+      }
     }
   };
 }

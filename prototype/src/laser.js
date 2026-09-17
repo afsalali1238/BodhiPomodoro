@@ -44,7 +44,7 @@ function frame(now) {
     g.globalCompositeOperation = 'source-over';
   } else if (blast.reduceMotion && p < 1) {
     // reduce-motion: static red edge outline on the target window rect
-    const { width: W, height: H, target, tier } = blast;
+    const { target } = blast;
     const pad = 6;
     if (target) {
       const tw = Math.max(50, target.width || 120);

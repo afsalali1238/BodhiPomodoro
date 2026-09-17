@@ -2,11 +2,21 @@
 /**
  * @fileoverview Data storage, atomic file persistence, and schema migrations.
  */
-const { app } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const D = require('./distraction');
 const R = require('./report');
+
+// `electron` is only resolvable when running inside the Electron runtime.
+// Falling back to null lets this module (and anything that depends on it,
+// like state.js) be required and unit-tested under plain Node.js.
+/** @type {import('electron').App|null} */
+let app = null;
+try {
+  ({ app } = require('electron'));
+} catch {
+  app = null;
+}
 
 /**
  * @typedef {Object} BodhiSettings
@@ -113,7 +123,10 @@ let log = { days: {}, totalSessions: 0, lastWrapDate: null };
  * @returns {string}
  */
 const file = name => {
-  const userData = app ? app.getPath('userData') : path.join(process.cwd(), '.data');
+  // Falls back to a plain directory when running outside Electron (unit tests,
+  // scripts). BODHI_DATA_DIR lets tests point this at a throwaway temp folder
+  // instead of polluting the repo's working directory.
+  const userData = app ? app.getPath('userData') : (process.env.BODHI_DATA_DIR || path.join(process.cwd(), '.data'));
   return path.join(userData, name);
 };
 
@@ -147,7 +160,11 @@ function writeJsonAtomic(name, data) {
   const dir = path.dirname(target);
   try {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  } catch {}
+  } catch (e) {
+    // Non-fatal: the write below will surface its own error if the dir truly
+    // couldn't be created (e.g. permissions).
+    console.warn(`[storage] Could not ensure data directory exists (${dir}):`, e.message);
+  }
 
   const tmp = `${target}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}.tmp`;
   try {
@@ -157,7 +174,10 @@ function writeJsonAtomic(name, data) {
     console.error(`[storage] Atomic write failed for ${name}:`, e.message);
     try {
       if (fs.existsSync(tmp)) fs.unlinkSync(tmp);
-    } catch {}
+    } catch (cleanupErr) {
+      // Best-effort cleanup of the leftover temp file; not fatal either way.
+      console.warn(`[storage] Could not remove leftover temp file ${tmp}:`, cleanupErr.message);
+    }
     // Fallback direct write if rename fails
     try {
       fs.writeFileSync(target, JSON.stringify(data, null, 2), 'utf8');
@@ -195,7 +215,10 @@ function backupSession() {
   try {
     const src = file('session.json');
     if (fs.existsSync(src)) fs.copyFileSync(src, file('session.json.bak'));
-  } catch {}
+  } catch (e) {
+    // Best-effort backup; losing it doesn't affect the live session file.
+    console.warn('[storage] backupSession failed:', e.message);
+  }
 }
 
 function backupData() {
@@ -204,7 +227,10 @@ function backupData() {
     if (fs.existsSync(logFile)) fs.copyFileSync(logFile, file('log.json.bak'));
     const tasksFile = file('tasks.json');
     if (fs.existsSync(tasksFile)) fs.copyFileSync(tasksFile, file('tasks.json.bak'));
-  } catch {}
+  } catch (e) {
+    // Best-effort backup; losing it doesn't affect the live data files.
+    console.warn('[storage] backupData failed:', e.message);
+  }
 }
 
 /**

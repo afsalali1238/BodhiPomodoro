@@ -2,19 +2,16 @@
 /**
  * @fileoverview Window management, multi-monitor bounds, z-ordering, and rendering broadcasts.
  */
-const { BrowserWindow, screen, Notification, nativeImage } = require('electron');
+const { BrowserWindow, screen, Notification } = require('electron');
 const path = require('path');
 const storage = require('./storage');
 const state = require('./state');
 const D = require('./distraction');
 
 const PET_W = 240, PET_H = 310;
-const WALK_W = 110, WALK_H = 150;
 
 /** @type {BrowserWindow|null} */
 let pet = null;
-/** @type {BrowserWindow|null} */
-let walker = null;
 /** @type {BrowserWindow|null} */
 let laserWin = null;
 /** @type {BrowserWindow|null} */

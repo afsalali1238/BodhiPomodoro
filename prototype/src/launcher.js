@@ -8,8 +8,10 @@ const BREAK_FOR = { 15: 3, 25: 5, 50: 10, 90: 20 };
 
 const ui = { minutes: 25, taskId: null, apps: new Set(), strict: true, presets: [10, 15, 25, 50, 90] };
 
-const db = { tasks: [], currentTaskId: null };
-const known = [];          // [{process, name, title}]
+// Reassigned wholesale whenever fresh data comes back from the main process
+// (see B.tasks.* calls and refreshApps() below), so these must be `let`.
+let db = { tasks: [], currentTaskId: null };
+let known = [];          // [{process, name, title}]
 let state = null;
 
 // ---------- tabs ----------

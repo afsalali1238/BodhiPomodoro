@@ -27,6 +27,7 @@ let wizData = { minutes: 25, taskId: null, newTask: '', focusApps: [], strict: t
 let cachedTasks = [];
 let cachedApps = [];
 let currentPhase = 'idle';
+let askTaskOnStart = true;
 
 const escHtml = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -63,6 +64,18 @@ function closeWizard() {
   if (wiz) wiz.style.display = 'none';
 }
 
+// When "Ask for task on start" is disabled in Settings, skip straight past
+// the task-picker step (step 2) to the focus-apps step, both when advancing
+// and when going back.
+function advanceFromStep1() {
+  if (askTaskOnStart) showWizStep2();
+  else showWizStep3();
+}
+function backFromStep3() {
+  if (askTaskOnStart) showWizStep2();
+  else showWizStep1();
+}
+
 function showWizStep1() {
   wizStep = 1;
   const body = $('wizBody');
@@ -92,7 +105,7 @@ function showWizStep1() {
     const chip = e.target.closest('[data-min]');
     if (chip) {
       wizData.minutes = Number(chip.dataset.min) || 25;
-      showWizStep2();
+      advanceFromStep1();
     }
   };
 
@@ -100,7 +113,7 @@ function showWizStep1() {
     const v = Math.round(Number($('wizCustomMin').value));
     if (v >= 1 && v <= 240) {
       wizData.minutes = v;
-      showWizStep2();
+      advanceFromStep1();
     }
   };
 
@@ -222,7 +235,7 @@ function showWizStep3() {
   `;
 
   $('wizBtnClose').onclick = closeWizard;
-  $('wizBtnBack').onclick = () => showWizStep2();
+  $('wizBtnBack').onclick = backFromStep3;
 
   window.bodhi.apps.list().then(apps => {
     cachedApps = apps || [];
@@ -267,7 +280,7 @@ function renderStep3Content() {
   `;
 
   $('wizBtnClose').onclick = closeWizard;
-  $('wizBtnBack').onclick = () => showWizStep2();
+  $('wizBtnBack').onclick = backFromStep3;
 
   $('wizAppChips').onclick = e => {
     const chip = e.target.closest('[data-proc]');
@@ -316,6 +329,7 @@ window.bodhi.on('open-wizard', () => openWizard(1));
 window.bodhi.on('state', st => {
   setTree(st.treeStage);
   currentPhase = st.phase;
+  askTaskOnStart = st.settings.askTaskOnStart !== false;
   if (st.phase !== 'idle' && st.phase !== 'ready') {
     closeWizard();
   }

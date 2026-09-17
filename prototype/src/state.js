@@ -82,8 +82,6 @@ const esc = D.createEscalator();
 let stateChangeCallback = null;
 /** @type {((title: string, body: string, onClick?: () => void) => void)|null} */
 let notifyCallback = null;
-/** @type {((tier: number, targetRect: any) => void)|null} */
-let blastCallback = null;
 /** @type {((silent?: boolean) => void)|null} */
 let stopBlastCallback = null;
 /** @type {((tab?: string) => void)|null} */
@@ -594,7 +592,6 @@ module.exports = {
   setCallbacks: (cbs) => {
     if (cbs.onStateChange) stateChangeCallback = cbs.onStateChange;
     if (cbs.onNotify) notifyCallback = cbs.onNotify;
-    if (cbs.onBlast) blastCallback = cbs.onBlast;
     if (cbs.onStopBlast) stopBlastCallback = cbs.onStopBlast;
     if (cbs.onOpenLauncher) openLauncherCallback = cbs.onOpenLauncher;
     if (cbs.onOpenReport) openReportCallback = cbs.onOpenReport;
