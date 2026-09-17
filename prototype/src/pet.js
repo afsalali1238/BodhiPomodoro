@@ -310,10 +310,6 @@ function submitWizard() {
   });
 }
 
-// Expose startSession on window.bodhi
-window.bodhi.startSession = minutes => {
-  window.bodhi.send('start-session', minutes);
-};
 
 window.bodhi.on('open-wizard', () => openWizard(1));
 
