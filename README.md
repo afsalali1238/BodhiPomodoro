@@ -2,7 +2,7 @@
   <h1>🧘‍♂️ Bodhi Pomodoro</h1>
   <p><b>Your personal, pixel-art monk who lives on your desktop, helps you focus, and occasionally shoots lasers at your distractions.</b></p>
   
-  ![Bodhi in Action](https://raw.githubusercontent.com/afsalali1238/petsid/main/prototype/src/icon.png)
+  ![Bodhi in Action](assets/hero-screenshot.png)
   
   *A highly optimized, transparent desktop pet built with Electron & Vanilla JS.*
 </div>
