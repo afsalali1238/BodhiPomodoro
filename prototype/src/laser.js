@@ -50,7 +50,7 @@ function frame(now) {
       const tw = Math.max(50, target.width || 120);
       const th = Math.max(50, target.height || 80);
       g.strokeStyle = '#ff2a2a'; g.lineWidth = 3; g.lineCap = 'round'; g.lineDashOffset = now / 10;
-      g.setLineDash([15, 10]); g.strokeRect(target.x - pad, target.y - pad, tw, th); g.setLineDash([]);
+      g.setLineDash([15, 10]); g.strokeRect(target.x - tw / 2 - pad, target.y - th / 2 - pad, tw + pad * 2, th + pad * 2); g.setLineDash([]);
     }
   }
   scorch = scorch.filter(s => now - s.t < 800);                     // scorch marks fade in 800 ms
