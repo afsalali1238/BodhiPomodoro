@@ -57,14 +57,22 @@
   .waking #stand { animation: rise 1.4s ease-out 3.4s forwards; }
   @keyframes rise { 0% { opacity: 0; transform: translateY(14px) scaleY(.85) } 50% { opacity: 1 } 100% { opacity: 1; transform: none } }
   .walkingOut #sit, .break #sit, .returning #sit { opacity: 0; transition: none; }
-  .walkingOut.inscene #stand { opacity: 1; animation: walkOut 1.8s linear forwards; }
-  .returning.inscene #stand { opacity: 1; animation: walkIn 1.6s linear forwards; }
-  @keyframes walkOut { to { transform: translateX(140px) } }
-  @keyframes walkIn  { from { transform: translateX(140px) } to { transform: none } }
+  .walkingOut #stand { opacity: 1; animation: walkBehind 1.5s ease-in forwards; }
+  .returning #stand { opacity: 1; animation: walkFromBehind 1.5s ease-out forwards; }
+  @keyframes walkBehind {
+    0%   { transform: translateX(0); opacity: 1; }
+    70%  { transform: translateX(-55px); opacity: 1; }
+    100% { transform: translateX(-65px); opacity: 0; }
+  }
+  @keyframes walkFromBehind {
+    0%   { transform: translateX(-65px); opacity: 0; }
+    30%  { transform: translateX(-55px); opacity: 1; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
   .leg, .arm { transform-box: fill-box; transform-origin: 50% 0; }
-  .walkingOut.inscene .leg-front, .returning.inscene .leg-front, .walkingOut.inscene .arm-back, .returning.inscene .arm-back { animation: swingA .6s ease-in-out infinite; }
-  .walkingOut.inscene .leg-back, .returning.inscene .leg-back, .walkingOut.inscene .arm-front, .returning.inscene .arm-front { animation: swingB .6s ease-in-out infinite; }
-  .returning.inscene #standFlip { transform: scaleX(-1); }
+  .walkingOut .leg-front, .returning .leg-front, .walkingOut .arm-back, .returning .arm-back { animation: swingA .6s ease-in-out infinite; }
+  .walkingOut .leg-back, .returning .leg-back, .walkingOut .arm-front, .returning .arm-front { animation: swingB .6s ease-in-out infinite; }
+  .returning #standFlip { transform: scaleX(-1); }
   @keyframes swingA { 0%,100% { transform: rotate(18deg) } 50% { transform: rotate(-18deg) } }
   @keyframes swingB { 0%,100% { transform: rotate(-18deg) } 50% { transform: rotate(18deg) } }
 
@@ -130,8 +138,8 @@
   .compact #sign rect:nth-of-type(2) { x: -44; width: 88px; y: -26; height: 30px; }
 
   /* control buttons */
-  #ctl { opacity: 0; transition: opacity .2s; }
-  .focus:hover #ctl, .paused:hover #ctl, .waking:hover #ctl, .break:hover #ctl { opacity: 1; }
+  #ctl { opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .focus:hover #ctl, .paused:hover #ctl, .waking:hover #ctl, .break:hover #ctl { opacity: 1; pointer-events: auto; }
   #ctl .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: 1; }
   #ctl .btn:hover rect { fill: #f59a3c; }
   #ctl .btn text { fill: #fff; font-size: 8.5px; font-weight: 700; }
@@ -470,7 +478,7 @@
   <g id="hint"><text x="120" y="10" text-anchor="middle">click: start · right-click: menu</text></g>
 
   <!-- small control buttons under the pet -->
-  <g id="ctl" transform="translate(120,10)" style="opacity:0; pointer-events:none; transition:opacity .2s">
+  <g id="ctl" transform="translate(120,10)">
     <g class="btn" data-act="toggle" transform="translate(-35,0)">
       <rect x="-18" y="-8" width="36" height="16" rx="8" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width="1"/>
       <text id="ctlToggle" text-anchor="middle" dy="3.5" fill="#fff" font-size="8.5" font-weight="700">⏸</text>
@@ -486,8 +494,8 @@
   </g>
 
   <!-- Inline start wizard (overlays tree area) -->
-  <foreignObject id="wizard" x="10" y="36" width="220" height="190" style="display:none; pointer-events:all;">
-    <div xmlns="http://www.w3.org/1999/xhtml" id="wizBody" class="wiz-card"></div>
+  <foreignObject id="wizard" x="10" y="36" width="220" height="190" style="display:none; pointer-events:none;">
+    <div xmlns="http://www.w3.org/1999/xhtml" id="wizBody" class="wiz-card" style="pointer-events:all;"></div>
   </foreignObject>
 </svg>
 

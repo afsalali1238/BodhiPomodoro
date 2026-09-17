@@ -21,13 +21,308 @@ const clip = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
 const SIGN = { water: 'drink water', breathe: 'breathe slowly', stretch: 'stand & stretch', eyes: 'look far away',
   coffee: 'coffee break', walk: 'take a walk' };
 
+// --- Inline Wizard State & Flow ---
+let wizStep = 0;          // 0=closed, 1=time, 2=task, 3=apps
+let wizData = { minutes: 25, taskId: null, newTask: '', focusApps: [], strict: true };
+let cachedTasks = [];
+let cachedApps = [];
+let currentPhase = 'idle';
+
+const escHtml = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function openWizard(step = 1) {
+  if (currentPhase !== 'idle' && currentPhase !== 'ready') return;
+  const wiz = $('wizard');
+  if (!wiz) return;
+  wizStep = step;
+  wizData.taskId = null;
+  wizData.newTask = '';
+  wiz.style.display = 'block';
+
+  if (step === 1) {
+    window.bodhi.session.defaults().then(d => {
+      if (d) {
+        wizData.minutes = d.minutes || 25;
+        wizData.focusApps = Array.isArray(d.focusApps) ? [...d.focusApps] : [];
+        wizData.strict = d.strict !== undefined ? d.strict : true;
+      }
+      showWizStep1();
+    }).catch(() => {
+      showWizStep1();
+    });
+  } else if (step === 2) {
+    showWizStep2();
+  } else if (step === 3) {
+    showWizStep3();
+  }
+}
+
+function closeWizard() {
+  wizStep = 0;
+  const wiz = $('wizard');
+  if (wiz) wiz.style.display = 'none';
+}
+
+function showWizStep1() {
+  wizStep = 1;
+  const body = $('wizBody');
+  if (!body) return;
+  const presets = [10, 15, 25, 50, 90];
+  const isPreset = presets.includes(wizData.minutes);
+
+  body.innerHTML = `
+    <div class="wiz-hdr">
+      <div class="wiz-hdr-title"><span>⏱ Duration</span></div>
+      <button class="wiz-close-btn" id="wizBtnClose" title="Close">✕</button>
+    </div>
+    <div class="wiz-chips" id="wizTimeChips">
+      ${presets.map(m => `<div class="wiz-chip${m === wizData.minutes ? ' on' : ''}" data-min="${m}">${m}m</div>`).join('')}
+    </div>
+    <div class="wiz-custom-row">
+      <input type="number" id="wizCustomMin" class="wiz-input" min="1" max="240" placeholder="Custom" value="${isPreset ? '' : wizData.minutes}">
+      <span style="font-size:10px; color:#a89c85;">min</span>
+      <button class="wiz-btn-sm" id="wizCustomGo">Next →</button>
+    </div>
+    <button class="wiz-quick-btn" id="wizQuickStart">⚡ Quick Start (${wizData.minutes}m)</button>
+  `;
+
+  $('wizBtnClose').onclick = closeWizard;
+
+  $('wizTimeChips').onclick = e => {
+    const chip = e.target.closest('[data-min]');
+    if (chip) {
+      wizData.minutes = Number(chip.dataset.min) || 25;
+      showWizStep2();
+    }
+  };
+
+  const advanceCustom = () => {
+    const v = Math.round(Number($('wizCustomMin').value));
+    if (v >= 1 && v <= 240) {
+      wizData.minutes = v;
+      showWizStep2();
+    }
+  };
+
+  $('wizCustomGo').onclick = advanceCustom;
+  $('wizCustomMin').onkeydown = e => {
+    if (e.key === 'Enter') advanceCustom();
+  };
+
+  $('wizQuickStart').onclick = () => {
+    submitWizard();
+  };
+}
+
+function showWizStep2() {
+  wizStep = 2;
+  const body = $('wizBody');
+  if (!body) return;
+
+  body.innerHTML = `
+    <div class="wiz-hdr">
+      <div class="wiz-hdr-title">
+        <button class="wiz-back-btn" id="wizBtnBack" title="Back">←</button>
+        <span>📝 Task</span>
+      </div>
+      <button class="wiz-close-btn" id="wizBtnClose" title="Close">✕</button>
+    </div>
+    <div style="font-size:9.5px; color:#a89c85; margin-bottom:4px;">Loading tasks…</div>
+  `;
+
+  $('wizBtnClose').onclick = closeWizard;
+  $('wizBtnBack').onclick = () => showWizStep1();
+
+  window.bodhi.tasks.list().then(res => {
+    cachedTasks = (res && res.tasks) || [];
+    renderStep2Content();
+  }).catch(() => {
+    renderStep2Content();
+  });
+}
+
+function renderStep2Content() {
+  if (wizStep !== 2) return;
+  const body = $('wizBody');
+  if (!body) return;
+
+  const open = cachedTasks.filter(t => !t.done);
+
+  body.innerHTML = `
+    <div class="wiz-hdr">
+      <div class="wiz-hdr-title">
+        <button class="wiz-back-btn" id="wizBtnBack" title="Back">←</button>
+        <span>📝 Task</span>
+      </div>
+      <button class="wiz-close-btn" id="wizBtnClose" title="Close">✕</button>
+    </div>
+    <div class="wiz-task-list" id="wizTaskList">
+      <div class="wiz-task-row${!wizData.taskId && !wizData.newTask ? ' on' : ''}" data-task-id="">
+        <span class="wiz-task-title" style="color:#a89c85;">No specific task (Skip)</span>
+        <span class="wiz-task-badge">→</span>
+      </div>
+      ${open.map(t => `
+        <div class="wiz-task-row${t.id === wizData.taskId ? ' on' : ''}" data-task-id="${escHtml(t.id)}">
+          <span class="wiz-task-title">${escHtml(t.title)}</span>
+          <span class="wiz-task-badge">${t.sessionsDone || 0}/${t.estimate || 1}</span>
+        </div>
+      `).join('')}
+    </div>
+    <div class="wiz-custom-row" style="margin-bottom:0;">
+      <input type="text" id="wizNewTask" class="wiz-input" placeholder="+ New task… (Enter)" style="flex:1;" value="${escHtml(wizData.newTask || '')}">
+      <button class="wiz-btn-sm" id="wizNewTaskGo">Next →</button>
+    </div>
+  `;
+
+  $('wizBtnClose').onclick = closeWizard;
+  $('wizBtnBack').onclick = () => showWizStep1();
+
+  $('wizTaskList').onclick = e => {
+    const row = e.target.closest('.wiz-task-row');
+    if (row) {
+      const id = row.dataset.taskId || null;
+      wizData.taskId = id;
+      wizData.newTask = '';
+      showWizStep3();
+    }
+  };
+
+  const advanceNewTask = () => {
+    const title = $('wizNewTask').value.trim();
+    if (title) {
+      wizData.taskId = null;
+      wizData.newTask = title;
+    } else {
+      wizData.taskId = null;
+      wizData.newTask = '';
+    }
+    showWizStep3();
+  };
+
+  $('wizNewTaskGo').onclick = advanceNewTask;
+  $('wizNewTask').onkeydown = e => {
+    if (e.key === 'Enter') advanceNewTask();
+  };
+}
+
+function showWizStep3() {
+  wizStep = 3;
+  const body = $('wizBody');
+  if (!body) return;
+
+  body.innerHTML = `
+    <div class="wiz-hdr">
+      <div class="wiz-hdr-title">
+        <button class="wiz-back-btn" id="wizBtnBack" title="Back">←</button>
+        <span>🔒 Focus Apps</span>
+      </div>
+      <button class="wiz-close-btn" id="wizBtnClose" title="Close">✕</button>
+    </div>
+    <div style="font-size:9.5px; color:#a89c85; margin-bottom:4px;">Scanning open apps…</div>
+  `;
+
+  $('wizBtnClose').onclick = closeWizard;
+  $('wizBtnBack').onclick = () => showWizStep2();
+
+  window.bodhi.apps.list().then(apps => {
+    cachedApps = apps || [];
+    renderStep3Content();
+  }).catch(() => {
+    renderStep3Content();
+  });
+}
+
+function renderStep3Content() {
+  if (wizStep !== 3) return;
+  const body = $('wizBody');
+  if (!body) return;
+
+  const byProc = new Map((cachedApps || []).map(a => [a.process.toLowerCase(), a]));
+  for (const p of wizData.focusApps) {
+    if (!byProc.has(p.toLowerCase())) {
+      byProc.set(p.toLowerCase(), { process: p, name: p, title: '' });
+    }
+  }
+  const appList = [...byProc.values()];
+
+  body.innerHTML = `
+    <div class="wiz-hdr">
+      <div class="wiz-hdr-title">
+        <button class="wiz-back-btn" id="wizBtnBack" title="Back">←</button>
+        <span>🔒 Focus Apps</span>
+      </div>
+      <button class="wiz-close-btn" id="wizBtnClose" title="Close">✕</button>
+    </div>
+    <div class="wiz-chips" id="wizAppChips" style="max-height:56px; overflow-y:auto;">
+      ${appList.length ? appList.map(a => {
+        const isSel = wizData.focusApps.some(p => p.toLowerCase() === a.process.toLowerCase());
+        return `<div class="wiz-chip${isSel ? ' on' : ''}" data-proc="${escHtml(a.process)}">${escHtml(a.name)}</div>`;
+      }).join('') : '<div style="color:#a89c85; font-size:9.5px; padding:2px;">No active apps detected</div>'}
+    </div>
+    <div class="wiz-switch${wizData.strict ? ' on' : ''}" id="wizStrictToggle">
+      <span class="k"></span>
+      <span class="wiz-switch-label">Strict mode (lasers if off-track)</span>
+    </div>
+    <button class="wiz-btn-primary" id="wizBtnStart">Start ${wizData.minutes}m Focus</button>
+  `;
+
+  $('wizBtnClose').onclick = closeWizard;
+  $('wizBtnBack').onclick = () => showWizStep2();
+
+  $('wizAppChips').onclick = e => {
+    const chip = e.target.closest('[data-proc]');
+    if (chip) {
+      const proc = chip.dataset.proc;
+      const idx = wizData.focusApps.findIndex(p => p.toLowerCase() === proc.toLowerCase());
+      if (idx >= 0) {
+        wizData.focusApps.splice(idx, 1);
+        chip.classList.remove('on');
+      } else {
+        wizData.focusApps.push(proc);
+        chip.classList.add('on');
+      }
+    }
+  };
+
+  $('wizStrictToggle').onclick = () => {
+    wizData.strict = !wizData.strict;
+    $('wizStrictToggle').classList.toggle('on', wizData.strict);
+  };
+
+  $('wizBtnStart').onclick = () => {
+    submitWizard();
+  };
+}
+
+function submitWizard() {
+  const payload = {
+    minutes: wizData.minutes,
+    taskId: wizData.taskId,
+    newTask: wizData.newTask,
+    focusApps: [...wizData.focusApps],
+    strict: wizData.strict
+  };
+  window.bodhi.session.start(payload).then(() => {
+    closeWizard();
+  }).catch(err => {
+    console.error('Failed to start session:', err);
+    closeWizard();
+  });
+}
+
 // Expose startSession on window.bodhi
 window.bodhi.startSession = minutes => {
   window.bodhi.send('start-session', minutes);
 };
 
+window.bodhi.on('open-wizard', () => openWizard(1));
+
 window.bodhi.on('state', st => {
   setTree(st.treeStage);
+  currentPhase = st.phase;
+  if (st.phase !== 'idle' && st.phase !== 'ready') {
+    closeWizard();
+  }
   const cls = [st.phase];
   if (st.paused) cls.push('paused');
   if (st.pauseReason === 'away') cls.push('away');
@@ -104,6 +399,13 @@ window.bodhi.on('chime', on => {
 let down = null;
 svg.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
+  // If clicking inside the wizard HTML, ignore so standard HTML controls work
+  if (e.target.closest('#wizBody')) return;
+  // If wizard is open and user clicks outside, close it
+  if (wizStep > 0) {
+    closeWizard();
+    return;
+  }
   const act = e.target.closest('[data-act]');
   down = { x: e.screenX, y: e.screenY, moved: false, act: act && act.dataset.act };
   // prevent drag if clicking any control button
@@ -116,8 +418,13 @@ window.addEventListener('mousemove', e => {
 });
 window.addEventListener('mouseup', () => {
   if (!down) return;
-  if (down.act) window.bodhi.petAction(down.act);
-  else { window.bodhi.dragEnd(); if (!down.moved) window.bodhi.toggle(); }
+  if (down.act) {
+    if (down.act === 'timer') openWizard(1);
+    else window.bodhi.petAction(down.act);
+  } else {
+    window.bodhi.dragEnd();
+    if (!down.moved) window.bodhi.toggle();
+  }
   down = null;
 });
 // control buttons (toggle/tasks/settings)
@@ -125,37 +432,18 @@ svg.addEventListener('click', e => {
   const ctl = e.target.closest('#ctl .btn');
   if (ctl && ctl.dataset.act) window.bodhi.petAction(ctl.dataset.act);
 });
-// quick buttons (timer/tasks/settings)
-svg.addEventListener('click', e => {
-  const q = e.target.closest('#quick .btn');
-  if (q && q.dataset.act) {
-    if (q.dataset.act === 'timer') {
-      // show time popup
-      const popup = $('timePopup');
-      if (!popup) return;
-      const timeOpts = $('timeOpts');
-      if (timeOpts.innerHTML === '') {
-        const presets = [10, 15, 25, 50, 90];
-        timeOpts.innerHTML = presets.map((m, i) => 
-          `<g class="timeChip" data-min="${m}" transform="translate(${i*18}-10)">
-            <rect x="0" y="0" width="16" height="10" rx="2"/>
-            <text x="8" y="7" text-anchor="middle">${m}</text>
-          </g>`
-        ).join('');
-        timeOpts.addEventListener('click', e => {
-          const c = e.target.closest('.timeChip');
-          if (c) {
-            const minutes = +c.dataset.min;
-            popup.setAttribute('style', 'opacity:0; pointer-events:none');
-            // Start session directly with selected time
-            window.bodhi.startSession(minutes);
-          }
-        });
-      }
-      popup.setAttribute('style', popup.getAttribute('style').includes('opacity:0') ? 'opacity:1; pointer-events:auto' : 'opacity:0; pointer-events:none');
-    } else if (q.dataset.act === 'tasks') window.bodhi.petAction('tasks');
-    else if (q.dataset.act === 'settings') window.bodhi.petAction('settings');
+
+svg.addEventListener('dblclick', e => {
+  if (e.target.closest('#wizBody')) return;
+  if (!e.target.closest('[data-act]')) window.bodhi.petAction('tasks');
+});
+svg.addEventListener('contextmenu', e => {
+  if (e.target.closest('#wizBody')) return;
+  e.preventDefault();
+  window.bodhi.menu();
+});
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && wizStep > 0) {
+    closeWizard();
   }
 });
-svg.addEventListener('dblclick', e => { if (!e.target.closest('[data-act]')) window.bodhi.petAction('tasks'); });
-svg.addEventListener('contextmenu', e => { e.preventDefault(); window.bodhi.menu(); });

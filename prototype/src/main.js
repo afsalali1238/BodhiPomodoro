@@ -58,7 +58,7 @@ const S = {
 };
 let onTimerDone = null;
 let pet = null, walker = null, laserWin = null, settingsWin = null, tasksWin = null, reportWin = null, launcherWin = null, tray = null;
-let wakingTimer = null, fxTimer = null, watcher = null, lastWin = null;
+let wakingTimer = null, fxTimer = null, watcher = null, lastWin = null, blastTimers = [];
 const esc = D.createEscalator();
 
 const remainingMs = () => S.paused ? S.pausedRemaining : Math.max(0, S.endsAt - Date.now());
@@ -165,7 +165,6 @@ function requestStart() {
 function startFocus(taskId, opts) {
   if (taskId !== undefined) { tasksDb.currentTaskId = taskId; saveTasks(); }
   if (opts) { S.sessionMin = opts.minutes || null; S.sessionApps = opts.strict ? (opts.focusApps || []) : []; }
-  closeWalker();
   Object.assign(S, { phase: 'focus', focusStart: Date.now(), activeMs: 0, sessionDistractions: 0, extended: 0, nudged: false });
   startTimer(durations().focus, finishFocus);
 }
@@ -209,8 +208,7 @@ function leaveForBreak() {
   if (S.phase !== 'waking') return;
   commitSession();
   S.phase = 'walkingOut'; pushState();
-  if (settings.walkAcross && !S.hidden) walkAcross('out', beginBreak);
-  else setTimeout(beginBreak, 1800);
+  setTimeout(beginBreak, 1500);
 }
 
 const SHORT_ACTS = ['water', 'breathe', 'stretch', 'eyes'];
@@ -247,19 +245,19 @@ function finishBreak() {
     if (S.demo) { S.demo = false; pushState(); return; }
     if (settings.autoStartFocus) setTimeout(() => startFocus(), 1500);
   };
-  if (settings.walkAcross && !S.hidden) walkAcross('in', back); else setTimeout(back, 1500);
+  setTimeout(back, 1500);
 }
 
 function skip() {
   if (S.phase === 'focus') { onTimerDone = null; finishFocus(); }
   else if (S.phase === 'waking') { clearTimeout(wakingTimer); leaveForBreak(); }
   else if (S.phase === 'break') { onTimerDone = null; finishBreak(); }
-  else if (S.phase === 'walkingOut' || S.phase === 'returning') { closeWalker(); walkDone && walkDone(); }
+  else if (S.phase === 'walkingOut' || S.phase === 'returning') { /* CSS animation completes naturally */ }
 }
 
 function reset() {
-  dialog.showMessageBox({ type: 'question', title: 'Reset session?', message: 'Cancel current session and clear all timers?' }).then(res => {
-    if (res.response === 0) { clearTimeout(wakingTimer); onTimerDone = null; closeWalker(); stopBlast();
+  dialog.showMessageBox({ type: 'question', title: 'Reset session?', message: 'Cancel current session and clear all timers?', buttons: ['Reset', 'Cancel'], defaultId: 0, cancelId: 1 }).then(res => {
+    if (res.response === 0) { clearTimeout(wakingTimer); onTimerDone = null; stopBlast();
       Object.assign(S, { phase: 'idle', paused: false, pauseReason: null, total: 0, endsAt: 0, cycle: 0, fx: null, demo: false, activity: null });
       pushState();
     }
@@ -308,41 +306,7 @@ function createPet() {
 }
 function movePetToDisplay() { if (pet) { pet.setBounds(petBounds()); pushState(); } }
 
-function closeWalker() { if (walker && !walker.isDestroyed()) walker.destroy(); walker = null; }
-let walkDone = null;
-function walkAcross(direction, done) {
-  closeWalker();
-  walkDone = () => { walkDone = null; done(); };
-  const wa = getDisplay().workArea;
-  const pb = pet.getBounds();
-  const k = pb.width / PET_W;
-  const w = Math.round(WALK_W * k), h = Math.round(WALK_H * k);
-  const y = Math.round(pb.y + 105 * k);
-  const home = pb.x + 150 * k - 55 * k;
-  // hide near screen edge instead of walking full length
-  const edge = wa.x + wa.width + 10;  // 10px past right edge
-  const from = home;
-  const to = edge;
-  const facingLeft = false;
-  walker = new BrowserWindow({ x: Math.round(from), y, width: w, height: h, transparent: true, frame: false, resizable: false,
-    alwaysOnTop: true, skipTaskbar: true, focusable: false, hasShadow: false, show: false, backgroundColor: '#00000000', webPreferences: prefs() });
-  walker.setIgnoreMouseEvents(true);
-  walker.setAlwaysOnTop(true, 'screen-saver');
-  walker.loadFile(path.join(__dirname, 'walker.html'));
-  walker.webContents.on('did-finish-load', () => {
-    walker.showInactive();
-    walker.webContents.send('walker', { facingLeft });
-    const speed = 120 * k;
-    const dist = Math.abs(to - from), duration = Math.max(800, dist / speed * 1000), t0 = Date.now();
-    const ease = x => x < .1 ? x * x * 5 : x > .9 ? 1 - (1 - x) * (1 - x) * 5 : x;
-    const iv = setInterval(() => {
-      if (!walker || walker.isDestroyed()) { clearInterval(iv); return; }
-      const p = Math.min(1, (Date.now() - t0) / duration);
-      walker.setPosition(Math.round(from + (to - from) * ease(p)), y);
-      if (p >= 1) { clearInterval(iv); closeWalker(); walkDone && walkDone(); }
-    }, 16);
-  });
-}
+
 
 function smallWindow(win, htmlFile, opts) {
   if (win && !win.isDestroyed()) { win.show(); win.focus(); return win; }
@@ -454,11 +418,15 @@ function fireBlast(tier, targetRect) {
     }
     laserWin.webContents.send('blast', { lensL: l, lensR: r, target, tier, duration, width: wa.width, height: wa.height, sound: settings.sound, reduceMotion: settings.reduceMotion });
   });
-  setTimeout(() => { if (S.fx && S.fx.startsWith('blast')) { S.fx = null; pushState(); } esc.firing = false; }, duration + 400);
-  setTimeout(() => stopBlast(true), duration + 1400);
+  blastTimers.push(
+    setTimeout(() => { if (S.fx && S.fx.startsWith('blast')) { S.fx = null; pushState(); } esc.firing = false; }, duration + 400),
+    setTimeout(() => stopBlast(true), duration + 1400)
+  );
 }
 
 function stopBlast(silent) {
+  blastTimers.forEach(clearTimeout);
+  blastTimers = [];
   if (laserWin && !laserWin.isDestroyed()) laserWin.destroy();
   laserWin = null;
   if (pet && !pet.isDestroyed()) pet.setAlwaysOnTop(settings.alwaysOnTop, 'floating');
@@ -577,7 +545,7 @@ ipcMain.on('pet-action', (_e, a) => ({
   tasks: () => openLauncher('tasks'),
   settings: openSettings,
   toggle: requestStart,
-  timer: () => openLauncher('start')
+  timer: requestStart
 })[a]?.());
 let dragOffset = null;
 ipcMain.on('drag-start', (_e, p) => { const [x, y] = pet.getPosition(); dragOffset = { dx: p.x - x, dy: p.y - y }; });
@@ -632,8 +600,8 @@ ipcMain.handle('tasks:update', (_e, { id, patch }) => {
   saveTasks(); pushState(); return tasksDb;
 });
 ipcMain.handle('tasks:delete', (_e, id) => {
-  dialog.showMessageBox({ type: 'question', title: 'Delete task?', message: 'This action cannot be undone.' }).then(res => {
-    if (res.response) {
+  dialog.showMessageBox({ type: 'question', title: 'Delete task?', message: 'This action cannot be undone.', buttons: ['Delete', 'Cancel'], defaultId: 0, cancelId: 1 }).then(res => {
+    if (res.response === 0) {
       tasksDb.tasks = tasksDb.tasks.filter(t => t.id !== id);
       if (tasksDb.currentTaskId === id) tasksDb.currentTaskId = (openTasks()[0] || {}).id || null;
       saveTasks(); pushState();
