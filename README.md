@@ -2,8 +2,6 @@
   <h1>🧘‍♂️ Bodhi Pomodoro</h1>
   <p><b>Your personal, pixel-art monk who lives on your desktop, helps you focus, and occasionally shoots lasers at your distractions.</b></p>
   
-  ![Bodhi in Action](assets/hero-screenshot.png)
-  
   *A highly optimized, transparent desktop pet built with Electron & Vanilla JS.*
 </div>
 
@@ -15,6 +13,53 @@
 > (native C#, compiled on the fly, with a PowerShell fallback) and are currently
 > **Windows-only**. On macOS/Linux those features are automatically disabled and
 > Bodhi still works great as a timer/desktop pet.
+
+## See it work
+
+### One full cycle — focus, session end, walk out, break, return
+<p align="center">
+  <img src="prototype/docs/images/full-loop.gif" width="280" alt="Bodhi sits, meditates, stands up, walks behind the tree, the break sign appears, then he comes back">
+</p>
+
+### Start a session in three taps
+<p align="center">
+  <img src="prototype/docs/images/start-wizard.gif" width="300" alt="Duration, then task, then the apps you'll use">
+</p>
+
+| Duration | Task | Focus apps |
+| --- | --- | --- |
+| <img src="prototype/docs/images/wizard-1-time.png" width="230"> | <img src="prototype/docs/images/wizard-2-task.png" width="230"> | <img src="prototype/docs/images/wizard-3-apps.png" width="230"> |
+
+### Drift off and he fires
+<p align="center">
+  <img src="prototype/docs/images/lasers-desktop.gif" width="820" alt="Beams sweeping across the desktop at a chat window">
+</p>
+
+Head shake first, then the shades go on, then the screen shakes and the pill reads *Return to the path*.
+
+<p align="center">
+  <img src="prototype/docs/images/distraction.gif" width="260" alt="Glance, shades, shake, nod">
+</p>
+
+### Breaks you actually take
+<p align="center">
+  <img src="prototype/docs/images/breathing.gif" width="260" alt="Breathe in 4, hold 4, out 6">
+  <img src="prototype/docs/images/07-break-water.png" width="230" alt="Drink water sign on the empty cushion">
+</p>
+
+### He keeps himself busy while you're idle
+<p align="center">
+  <img src="prototype/docs/images/idle-poses.gif" width="240" alt="Headphones, then reading">
+</p>
+
+### The tree grows with you
+<p align="center">
+  <img src="prototype/docs/images/tree-growth.gif" width="240" alt="Sapling to full canopy">
+  <img src="prototype/docs/images/tree-growth.png" width="640" alt="All five stages side by side">
+</p>
+
+### End of day
+<p align="center"><img src="prototype/docs/images/report.png" width="620" alt="Daily work report: time by task, timeline, distractions, notes"></p>
 
 ## 🌟 What is Bodhi Pomodoro?
 

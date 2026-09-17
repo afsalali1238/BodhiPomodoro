@@ -381,10 +381,11 @@ window.bodhi.on('state', st => {
     // cycle through idle poses
     if (window._poseTimer) clearInterval(window._poseTimer);
     if (st.phase === 'idle' || st.phase === 'ready') {
-      const poses = ['listening', 'reading', 'listening'];
+      const poses = ['listening', 'reading'];
       window._poseTimer = setInterval(() => {
-        window._idlePose = poses[Math.floor(Math.random() * 3)];
-        svg.setAttribute('class', [...svg.classList].join(' '));
+        window._idlePose = poses[Math.floor(Math.random() * poses.length)];
+        svg.classList.remove('listening', 'reading');
+        svg.classList.add(window._idlePose);
       }, 8000);
     }
   }
