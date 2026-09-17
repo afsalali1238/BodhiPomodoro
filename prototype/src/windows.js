@@ -45,7 +45,7 @@ function petScale(d = getDisplay()) {
   if (settings.scale === 'auto' || !Number(settings.scale)) {
     return Math.max(0.4, Math.min(1, (d.workArea.height * 0.2) / PET_H));
   }
-  return Number(settings.scale);
+  return Math.max(0.1, Math.min(3, Number(settings.scale)));
 }
 
 /**
