@@ -35,12 +35,12 @@ document.querySelectorAll('[data-p]').forEach(b => b.onclick = () => {
 document.querySelectorAll('[data-a]').forEach(b => b.onclick = () => window.bodhi.action(b.dataset.a));
 
 $('pickApps').onclick = () => {
-  window.bodhi.send('open-launcher', 'start');
+  window.bodhi.openLauncher('start');
 };
 
 $('save').onclick = () => {
   const s = {};
-  nums.forEach(k => s[k] = Number($(k).value) || 0);
+  nums.forEach(k => s[k] = Math.max(0, Number($(k).value) || 0));
   checks.forEach(k => s[k] = $(k).checked);
   time.forEach(k => s[k] = $(k).value);
   textareas.forEach(k => s[k] = $(k).value.trim().split('\n').map(x => x.trim()).filter(Boolean));
