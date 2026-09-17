@@ -18,6 +18,9 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
+          # setup-node resolves '20' to the latest 20.x patch release, which is
+          # well above the 20.11 minimum node:test's mock.timers object-form
+          # API needs (used in tests/state.test.js).
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: prototype/package-lock.json
