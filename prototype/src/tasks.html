@@ -1,0 +1,28 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Bodhi — Tasks</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; padding: 14px 16px; background: #1b1a17; color: #eee3cc; font: 13px "Segoe UI", system-ui, sans-serif; }
+  h1 { font-size: 15px; margin: 0 0 8px; color: #ffc24d; }
+  input { width: 100%; box-sizing: border-box; background: #2c2a24; color: #eee3cc; border: 1px solid #4a453a; border-radius: 8px; padding: 8px 10px; font: inherit; }
+  .hint { color: #a89c85; font-size: 11px; margin: 4px 0 10px; }
+  ul { list-style: none; padding: 0; margin: 0; max-height: 330px; overflow: auto; }
+  li { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; }
+  li.sel { background: #3a2c1a; outline: 1px solid #f59a3c; }
+  li .t { flex: 1; cursor: pointer; } li .n { color: #a89c85; font-size: 11px; }
+  button { background: #2c2a24; color: #eee3cc; border: 1px solid #4a453a; border-radius: 6px; padding: 4px 8px; font: inherit; cursor: pointer; }
+  button.primary { background: #f59a3c; border-color: #f59a3c; color: #1b1a17; font-weight: 700; }
+  .foot { display: flex; gap: 8px; margin-top: 12px; } .foot button { flex: 1; padding: 8px; }
+  #pickBar { display: none; } body.pick #pickBar { display: flex; }
+</style></head>
+<body>
+  <h1 id="title">Tasks</h1>
+  <input id="add" placeholder="Add a task…  e.g. “Write supplier report 2p”">
+  <div class="hint">Enter to add · “2p” = 2 sessions · click a task to select it</div>
+  <ul id="list"></ul>
+  <div class="foot" id="pickBar"><button class="primary" id="startSel">Start on selected</button><button id="justFocus">Just focus</button></div>
+  <!-- TODO(build): drag-to-reorder, edit title inline, "completed today" section -->
+<script src="tasks.js"></script>
+</body></html>

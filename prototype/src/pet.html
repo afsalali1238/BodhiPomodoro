@@ -1,0 +1,497 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Bodhi</title>
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; user-select: none; }
+  svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg:active { cursor: grabbing; }
+  text { font-family: "Segoe UI", system-ui, sans-serif; }
+  [data-act] { cursor: pointer; }
+
+  /* ---------- sitting ---------- */
+  #sit { transition: opacity .8s; }
+  .focus:not(.paused) #sit .body { animation: breathe 5s ease-in-out infinite; transform-origin: 0 0; transform-box: view-box; }
+  @keyframes breathe { 0%,100% { transform: scale(1,1) } 50% { transform: scale(1.012,1.028) } }
+  
+  /* idle poses - cycle through relaxed states */
+  .idle #sit .arm-lap { opacity: 0; }
+  .idle #sit .arm-raised { opacity: 1; }
+  .idle .reading #sit .arm-lap { opacity: 1; }
+  .idle .reading #sit .arm-raised { opacity: 0; }
+  .idle .listening #sit .arm-raised { opacity: 0; }
+  .idle .reading #sit .book { opacity: 1; }
+  .idle .listening #sit .headphones { opacity: 1; }
+
+  #aura { opacity: 0; transition: opacity 1.5s; }
+  .focus #aura { opacity: 1; animation: glow 5s ease-in-out infinite; }
+  @keyframes glow { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+  .paused #aura { animation: none; opacity: .3; }
+
+  .eyes-closed, .arm-lap, .shades, .arm-raised { transition: opacity .6s; }
+  .focus .shades, .focus .arm-raised { opacity: 0; }
+  .focus .eyes-closed, .focus .arm-lap { opacity: 1; }
+  .focus.away .eyes-closed { opacity: 0; }         /* away: he opens his eyes and waits */
+  .focus .lens-glint { animation: glint 5s ease-in-out infinite; }
+  @keyframes glint { 0%,100% { opacity: .35 } 50% { opacity: .8 } }
+
+  /* ---------- fx ---------- */
+  .head { transform-box: fill-box; transform-origin: 50% 90%; }
+  .fx-glance #sit .head { animation: shakeNo .8s ease-in-out 2; }
+  @keyframes shakeNo { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-9deg) } 75% { transform: rotate(9deg) } }
+  .fx-nod .head { animation: nod .9s ease-in-out 1; }
+  @keyframes nod { 0%,100% { transform: rotate(0) } 40% { transform: translateY(2px) rotate(0) scaleY(.96) } }
+  .fx-bow #sit .body { animation: bow 2.5s ease-in-out 1; transform-box: view-box; transform-origin: 0 0; }
+  @keyframes bow { 0%,100% { transform: none } 35%,65% { transform: skewX(-6deg) translate(4px, 0) scaleY(.95) } }
+  .fx-blast .shades, .fx-blast-shake .shades { opacity: 1 !important; }
+  .fx-blast .eyes-closed, .fx-blast-shake .eyes-closed { opacity: 0 !important; }
+  .fx-blast .shades rect, .fx-blast-shake .shades rect { fill: #ff2a2a; filter: url(#redGlow); }
+  .fx-blast-shake #sit { animation: shake .25s linear infinite; }
+  @keyframes shake { 0%,100% { transform: translate(0,0) } 25% { transform: translate(-2px,1px) } 75% { transform: translate(2px,-1px) } }
+
+  /* ---------- waking / walking ---------- */
+  #stand { opacity: 0; }
+  .waking #sit { opacity: 0; transition-delay: 3.2s; }
+  .waking #stand { animation: rise 1.4s ease-out 3.4s forwards; }
+  @keyframes rise { 0% { opacity: 0; transform: translateY(14px) scaleY(.85) } 50% { opacity: 1 } 100% { opacity: 1; transform: none } }
+  .walkingOut #sit, .break #sit, .returning #sit { opacity: 0; transition: none; }
+  .walkingOut.inscene #stand { opacity: 1; animation: walkOut 1.8s linear forwards; }
+  .returning.inscene #stand { opacity: 1; animation: walkIn 1.6s linear forwards; }
+  @keyframes walkOut { to { transform: translateX(140px) } }
+  @keyframes walkIn  { from { transform: translateX(140px) } to { transform: none } }
+  .leg, .arm { transform-box: fill-box; transform-origin: 50% 0; }
+  .walkingOut.inscene .leg-front, .returning.inscene .leg-front, .walkingOut.inscene .arm-back, .returning.inscene .arm-back { animation: swingA .6s ease-in-out infinite; }
+  .walkingOut.inscene .leg-back, .returning.inscene .leg-back, .walkingOut.inscene .arm-front, .returning.inscene .arm-front { animation: swingB .6s ease-in-out infinite; }
+  .returning.inscene #standFlip { transform: scaleX(-1); }
+  @keyframes swingA { 0%,100% { transform: rotate(18deg) } 50% { transform: rotate(-18deg) } }
+  @keyframes swingB { 0%,100% { transform: rotate(-18deg) } 50% { transform: rotate(18deg) } }
+
+  /* decision buttons after a session */
+  #decide { opacity: 0; pointer-events: none; transition: opacity .4s; }
+  .waking #decide { opacity: 1; pointer-events: all; }
+  .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: 1; }
+  .btn:hover rect { fill: #f59a3c; }
+  .btn text { fill: #fff; font-size: 9.5px; font-weight: 700; }
+  .btn:hover text { fill: #1b1a17; }
+  #btnDone { display: none; }
+  .has-task #btnDone { display: inline; }
+
+  /* ---------- break ---------- */
+  #sign { opacity: 0; pointer-events: none; transition: opacity .8s; }
+  .break #sign { opacity: 1; pointer-events: all; }
+  #sign text { font-size: 7.5px; font-weight: 700; fill: #3e2a1e; }
+  #sign .sub { font-size: 5.5px; font-weight: 600; fill: #6d4c35; }
+  .nudged #sign { animation: wiggle .5s ease-in-out 6; transform-box: fill-box; transform-origin: 50% 100%; }
+  @keyframes wiggle { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-6deg) } 75% { transform: rotate(6deg) } }
+  .prop { opacity: 0; transition: opacity .6s; }
+  .break.act-water #glass, .break.act-coffee #cup, .break.act-walk #cup { opacity: 1; }
+  #steam path { animation: steam 2.4s ease-in-out infinite; }
+  @keyframes steam { 0% { opacity: 0; transform: translateY(2px) } 50% { opacity: .8 } 100% { opacity: 0; transform: translateY(-5px) } }
+
+  #breath { opacity: 0; transition: opacity .8s; }
+  .break.act-breathe:not(.activity-done) #breath { opacity: 1; }
+  #breathCircle { animation: breathC 14s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+  @keyframes breathC { 0% { transform: scale(.55) } 28.5% { transform: scale(1) } 57% { transform: scale(1) } 100% { transform: scale(.55) } }
+  #breath text { font-size: 9px; font-weight: 700; fill: #2e5d3a; opacity: 0; }
+  #bIn { animation: tIn 14s infinite; } #bHold { animation: tHold 14s infinite; } #bOut { animation: tOut 14s infinite; }
+  @keyframes tIn { 0%,27% { opacity: 1 } 29%,100% { opacity: 0 } }
+  @keyframes tHold { 0%,28% { opacity: 0 } 30%,55% { opacity: 1 } 58%,100% { opacity: 0 } }
+  @keyframes tOut { 0%,56% { opacity: 0 } 59%,98% { opacity: 1 } 100% { opacity: 0 } }
+
+  /* ---------- ring, leaves, tree ---------- */
+  #ring { transition: stroke-dashoffset 1s linear; }
+  #ringWrap { opacity: 0; transition: opacity 1s; }
+  .focus #ringWrap { opacity: 1; }
+  .falling { opacity: 0; }
+  .focus:not(.paused) .falling { animation: fall 9s linear infinite; }
+  @keyframes fall { 0% { opacity: 0; transform: translate(0,0) rotate(0) } 10% { opacity: 1 } 85% { opacity: 1 } 100% { opacity: 0; transform: translate(-30px,130px) rotate(260deg) } }
+  .canopy { animation: sway 7s ease-in-out infinite; transform-origin: 100px 250px; transform-box: view-box; }
+  @keyframes sway { 0%,100% { transform: rotate(-.6deg) } 50% { transform: rotate(.6deg) } }
+
+  /* ---------- label ---------- */
+  #pill rect { fill: rgba(28,24,20,.86); stroke: rgba(245,154,60,.7); stroke-width: 1; }
+  #label { fill: #fff; font-size: 11.5px; font-weight: 600; letter-spacing: .3px; }
+  #taskLine { fill: #ffd9a8; font-size: 8.5px; font-weight: 600; }
+  #hint { opacity: 0; transition: opacity .3s; }
+  svg:hover #hint { opacity: 1; }
+  .focus #hint, .waking #hint { display: none; }
+  #hint text { fill: #fff; font-size: 8.5px; paint-order: stroke; stroke: rgba(0,0,0,.65); stroke-width: 2.5px; }
+  /* compact: pet rendered small (auto size on 720p) -> bigger text so it stays readable */
+  .compact #label { font-size: 16px; }
+  .compact #taskLine { font-size: 11.5px; }
+  .compact #pillRect { x: -112; width: 224px; }
+  .compact #hint { display: none; }
+  .compact .btn text { font-size: 12px; }
+  .compact .btn rect { x: -35; width: 70px; height: 24px; y: -12; }
+  .compact #sign text { font-size: 10px; }
+  .compact #sign .sub { font-size: 7px; }
+  .compact #sign rect:nth-of-type(2) { x: -44; width: 88px; y: -26; height: 30px; }
+
+  /* control buttons */
+  #ctl { opacity: 0; transition: opacity .2s; }
+  .focus:hover #ctl, .paused:hover #ctl, .waking:hover #ctl, .break:hover #ctl { opacity: 1; }
+  #ctl .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: 1; }
+  #ctl .btn:hover rect { fill: #f59a3c; }
+  #ctl .btn text { fill: #fff; font-size: 8.5px; font-weight: 700; }
+  #ctl .btn:hover text { fill: #1b1a17; }
+  .compact #ctl { opacity: 1 !important; }
+  .compact #ctl .btn rect { x: -22; width: 44px; height: 20px; y: -10; }
+  .compact #ctl .btn text { font-size: 12px; }
+  
+  /* quick buttons */
+  #quick { opacity: .8; }
+  #quick:hover { opacity: 1; }
+  #quick .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: .8; }
+  #quick .btn:hover rect { fill: #f59a3c; }
+  #quick .btn text { fill: #fff; font-size: 7px; font-weight: 700; }
+  #quick .btn:hover text { fill: #1b1a17; }
+  
+  /* inline wizard */
+  #wizard { overflow: visible; }
+  .wiz-card {
+    box-sizing: border-box;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #eee3cc;
+    background: rgba(24, 20, 16, 0.96);
+    border: 1px solid #f59a3c;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    max-height: 184px;
+    overflow-y: auto;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  }
+  .wiz-card::-webkit-scrollbar { width: 4px; }
+  .wiz-card::-webkit-scrollbar-thumb { background: rgba(245, 154, 60, 0.5); border-radius: 2px; }
+  .wiz-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(245, 154, 60, 0.25);
+  }
+  .wiz-hdr-title {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #ffd9a8;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .wiz-back-btn, .wiz-close-btn {
+    background: none;
+    border: 0;
+    color: #a89c85;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+  .wiz-back-btn:hover, .wiz-close-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .wiz-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 7px;
+  }
+  .wiz-chip {
+    background: rgba(45, 39, 32, 0.9);
+    border: 1px solid rgba(245, 154, 60, 0.4);
+    border-radius: 4px;
+    color: #eee3cc;
+    padding: 3px 7px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.12s;
+  }
+  .wiz-chip:hover {
+    border-color: #f59a3c;
+    background: rgba(245, 154, 60, 0.2);
+  }
+  .wiz-chip.on {
+    background: #f59a3c;
+    color: #1b1a17;
+    border-color: #f59a3c;
+    font-weight: 700;
+  }
+  .wiz-custom-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .wiz-input {
+    background: rgba(30, 26, 21, 0.9);
+    border: 1px solid rgba(245, 154, 60, 0.4);
+    border-radius: 4px;
+    color: #fff;
+    padding: 3px 6px;
+    font-size: 11px;
+    outline: none;
+    box-sizing: border-box;
+  }
+  .wiz-input:focus {
+    border-color: #f59a3c;
+  }
+  .wiz-custom-row input {
+    width: 55px;
+  }
+  .wiz-btn-sm {
+    background: rgba(245, 154, 60, 0.2);
+    border: 1px solid #f59a3c;
+    color: #ffd9a8;
+    border-radius: 4px;
+    padding: 3px 7px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .wiz-btn-sm:hover {
+    background: #f59a3c;
+    color: #1b1a17;
+  }
+  .wiz-quick-btn {
+    width: 100%;
+    background: rgba(245, 154, 60, 0.15);
+    border: 1px dashed #f59a3c;
+    color: #ffd9a8;
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+  }
+  .wiz-quick-btn:hover {
+    background: #f59a3c;
+    color: #1b1a17;
+    border-style: solid;
+  }
+  .wiz-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    max-height: 85px;
+    overflow-y: auto;
+    margin-bottom: 6px;
+    padding-right: 2px;
+  }
+  .wiz-task-list::-webkit-scrollbar { width: 3px; }
+  .wiz-task-list::-webkit-scrollbar-thumb { background: rgba(245, 154, 60, 0.4); border-radius: 2px; }
+  .wiz-task-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(45, 39, 32, 0.8);
+    border: 1px solid rgba(245, 154, 60, 0.25);
+    border-radius: 4px;
+    padding: 3px 6px;
+    cursor: pointer;
+    font-size: 10px;
+    transition: all 0.1s;
+  }
+  .wiz-task-row:hover {
+    border-color: #f59a3c;
+    background: rgba(245, 154, 60, 0.15);
+  }
+  .wiz-task-row.on {
+    border-color: #f59a3c;
+    background: rgba(245, 154, 60, 0.25);
+    font-weight: 700;
+  }
+  .wiz-task-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    margin-right: 4px;
+  }
+  .wiz-task-badge {
+    color: #a89c85;
+    font-size: 9px;
+  }
+  .wiz-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0;
+    cursor: pointer;
+    user-select: none;
+  }
+  .wiz-switch .k {
+    width: 24px;
+    height: 14px;
+    border-radius: 7px;
+    background: #4a453a;
+    position: relative;
+    flex: none;
+    transition: background 0.2s;
+  }
+  .wiz-switch .k::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.2s;
+  }
+  .wiz-switch.on .k {
+    background: #ff6b5b;
+  }
+  .wiz-switch.on .k::after {
+    left: 12px;
+  }
+  .wiz-switch-label {
+    font-size: 9.5px;
+    color: #eee3cc;
+  }
+  .wiz-btn-primary {
+    width: 100%;
+    background: #f59a3c;
+    color: #1b1a17;
+    border: 0;
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-weight: 700;
+    font-size: 11px;
+    cursor: pointer;
+    transition: filter 0.12s;
+  }
+  .wiz-btn-primary:hover {
+    filter: brightness(1.1);
+  }
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 240 310">
+  <g id="defsHost"></g>
+  <defs>
+    <radialGradient id="auraG">
+      <stop offset="0" stop-color="#fff3b0" stop-opacity=".95"/>
+      <stop offset=".55" stop-color="#ffd54f" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#ffb300" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="redGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="1.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="breathG"><stop offset="0" stop-color="#e8f7e4" stop-opacity=".95"/><stop offset="1" stop-color="#9fd49a" stop-opacity=".55"/></radialGradient>
+  </defs>
+
+  <ellipse cx="120" cy="258" rx="114" ry="15" fill="#5f8a34"/>
+  <ellipse cx="120" cy="254" rx="106" ry="11" fill="#86b24a"/>
+  <ellipse cx="100" cy="251" rx="70" ry="5" fill="#a6cc62" opacity=".6"/>
+
+  <g id="treeHost"></g>
+
+  <g id="ringWrap" transform="translate(150,176)">
+    <circle r="40" fill="url(#auraG)" id="aura"/>
+    <circle r="36" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2.5"/>
+    <circle id="ring" r="36" fill="none" stroke="#ffc24d" stroke-width="2.5" stroke-linecap="round"
+            transform="rotate(-90)" stroke-dasharray="226.2" stroke-dashoffset="226.2"/>
+  </g>
+
+  <g id="cushionBase"><ellipse cx="150" cy="253" rx="44" ry="9" fill="#a83838"/><ellipse cx="150" cy="249" rx="42" ry="8" fill="#d94f4f"/><ellipse cx="141" cy="246.5" rx="20" ry="2.6" fill="#f07a7a" opacity=".6"/></g>
+
+  <!-- break props -->
+  <g id="glass" class="prop" transform="translate(132,236)">
+    <path d="M-5,-12 L5,-12 L4,6 Q0,8 -4,6 Z" fill="#dff3ff" fill-opacity=".75" stroke="#9cc9e0" stroke-width=".8"/>
+    <path d="M-4.4,-4 L4.4,-4 L4,6 Q0,8 -4,6 Z" fill="#6ec3f0" opacity=".8"/>
+    <path d="M-3,-10 L-3.4,3" stroke="#fff" stroke-width=".8" opacity=".8"/>
+  </g>
+  <g id="cup" class="prop" transform="translate(130,240)">
+    <path d="M-7,-8 L7,-8 L6,3 Q0,6 -6,3 Z" fill="#fff8ef" stroke="#c9b8a4" stroke-width=".8"/>
+    <path d="M7,-6 q5,0 4,5 q-1,3 -5,3" stroke="#c9b8a4" stroke-width="1.3" fill="none"/>
+    <ellipse cx="0" cy="-8" rx="7" ry="1.6" fill="#7a4a2a"/>
+    <g id="steam" stroke="#fff" stroke-width="1" fill="none" stroke-linecap="round">
+      <path d="M-2,-11 q-2,-3 0,-6 q2,-3 0,-6"/><path d="M3,-11 q-2,-3 0,-6 q2,-3 0,-6" style="animation-delay:1.2s"/>
+    </g>
+  </g>
+
+  <g id="breath" transform="translate(150,196)">
+    <circle id="breathCircle" r="30" fill="url(#breathG)" stroke="#7cc07a" stroke-width="1"/>
+    <text id="bIn" text-anchor="middle" dy="3">breathe in</text>
+    <text id="bHold" text-anchor="middle" dy="3">hold</text>
+    <text id="bOut" text-anchor="middle" dy="3">breathe out</text>
+  </g>
+
+  <g id="sign" data-act="activity" transform="translate(186,236)">
+    <rect x="-1.5" y="0" width="3" height="16" fill="#6d4c35"/>
+    <rect x="-34" y="-20" width="68" height="22" rx="3" fill="#c89b6a" stroke="#6d4c35" stroke-width="1.2"/>
+    <text id="signText" x="0" y="-9" text-anchor="middle">drink water</text>
+    <text id="signSub" class="sub" x="0" y="-2" text-anchor="middle">tap when done</text>
+  </g>
+
+  <g transform="translate(150,247)"><g id="sit"></g></g>
+  <g transform="translate(150,250)"><g id="stand"><g id="standFlip"></g></g></g>
+
+  <g id="fallHost"></g>
+
+  <g id="decide" transform="translate(120,20)">
+    <g class="btn" data-act="extend" transform="translate(-76,0)"><rect x="-31" y="-10" width="62" height="20" rx="10"/><text text-anchor="middle" dy="3.4">+5 min</text></g>
+    <g class="btn" id="btnDone" data-act="done" transform="translate(0,0)"><rect x="-33" y="-10" width="66" height="20" rx="10"/><text text-anchor="middle" dy="3.4">Done ✓</text></g>
+    <g class="btn" data-act="go" transform="translate(76,0)"><rect x="-31" y="-10" width="62" height="20" rx="10"/><text text-anchor="middle" dy="3.4">Not yet</text></g>
+  </g>
+
+  <g id="pill" transform="translate(120,274)">
+    <rect id="pillRect" x="-90" y="-12" width="180" height="24" rx="12"/>
+    <text id="label" text-anchor="middle" dy="4">Click to meditate</text>
+    <text id="taskLine" data-act="tasks" text-anchor="middle" dy="10.5"></text>
+  </g>
+  <!-- small buttons below the pet -->
+  <g id="quick" transform="translate(120,300)">
+    <g class="btn" data-act="timer" transform="translate(-50,0)">
+      <rect x="-15" y="-6" width="30" height="12" rx="6" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width=".8"/>
+      <text text-anchor="middle" dy="3.5" fill="#fff" font-size="7" font-weight="700">⏱</text>
+    </g>
+    <g class="btn" data-act="tasks" transform="translate(0,0)">
+      <rect x="-15" y="-6" width="30" height="12" rx="6" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width=".8"/>
+      <text text-anchor="middle" dy="3.5" fill="#fff" font-size="7" font-weight="700">✎</text>
+    </g>
+    <g class="btn" data-act="settings" transform="translate(50,0)">
+      <rect x="-15" y="-6" width="30" height="12" rx="6" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width=".8"/>
+      <text text-anchor="middle" dy="3.5" fill="#fff" font-size="7" font-weight="700">⚙</text>
+    </g>
+  </g>
+  <g id="hint"><text x="120" y="10" text-anchor="middle">click: start · right-click: menu</text></g>
+
+  <!-- small control buttons under the pet -->
+  <g id="ctl" transform="translate(120,10)" style="opacity:0; pointer-events:none; transition:opacity .2s">
+    <g class="btn" data-act="toggle" transform="translate(-35,0)">
+      <rect x="-18" y="-8" width="36" height="16" rx="8" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width="1"/>
+      <text id="ctlToggle" text-anchor="middle" dy="3.5" fill="#fff" font-size="8.5" font-weight="700">⏸</text>
+    </g>
+    <g class="btn" data-act="tasks" transform="translate(0,0)">
+      <rect x="-18" y="-8" width="36" height="16" rx="8" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width="1"/>
+      <text id="ctlTasks" text-anchor="middle" dy="3.5" fill="#fff" font-size="8.5" font-weight="700">✎</text>
+    </g>
+    <g class="btn" data-act="settings" transform="translate(35,0)">
+      <rect x="-18" y="-8" width="36" height="16" rx="8" fill="rgba(28,24,20,.9)" stroke="#f59a3c" stroke-width="1"/>
+      <text id="ctlSettings" text-anchor="middle" dy="3.5" fill="#fff" font-size="8.5" font-weight="700">⚙</text>
+    </g>
+  </g>
+
+  <!-- Inline start wizard (overlays tree area) -->
+  <foreignObject id="wizard" x="10" y="36" width="220" height="190" style="display:none; pointer-events:all;">
+    <div xmlns="http://www.w3.org/1999/xhtml" id="wizBody" class="wiz-card"></div>
+  </foreignObject>
+</svg>
+
+<script src="figures.js"></script>
+<script src="pet.js"></script>
+</body>
+</html>

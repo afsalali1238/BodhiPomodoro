@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<style>
+  html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+  svg { width: 100%; height: 100%; display: block; }
+  .leg, .arm { transform-box: fill-box; transform-origin: 50% 0; }
+  .leg-front, .arm-back { animation: swingA .6s ease-in-out infinite; }
+  .leg-back, .arm-front { animation: swingB .6s ease-in-out infinite; }
+  .walker-body { animation: bob .3s ease-in-out infinite alternate; }
+  @keyframes swingA { 0%,100% { transform: rotate(18deg) } 50% { transform: rotate(-18deg) } }
+  @keyframes swingB { 0%,100% { transform: rotate(-18deg) } 50% { transform: rotate(18deg) } }
+  @keyframes bob { from { transform: translateY(0) } to { transform: translateY(-1.5px) } }
+  .dust { fill: #d8cbb8; animation: dust .6s ease-out infinite; }
+  @keyframes dust { 0% { opacity: .8; transform: translate(0,0) scale(.6) } 100% { opacity: 0; transform: translate(-8px,-4px) scale(1.4) } }
+</style>
+</head>
+<body>
+<svg viewBox="0 0 110 150"><g id="defsHost"></g>
+  <g transform="translate(55,145)"><g id="fig"></g>
+    <g class="dust"><circle cx="-12" cy="-3" r="3"/><circle cx="-18" cy="-5" r="2.2"/><circle cx="-8" cy="-6" r="1.8"/></g></g>
+</svg>
+<script src="figures.js"></script>
+<script src="walker.js"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+<title>Bodhi</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #1b1a17; --card: #25231e; --line: #3a362e; --text: #eee3cc; --muted: #a89c85;
+    --accent: #f59a3c; --accent-ink: #1b1a17; --gold: #ffc24d; --ok: #7cc07a; --red: #ff6b5b;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 13px "Segoe UI", system-ui, sans-serif; display: flex; flex-direction: column; }
+  button, input { font: inherit; color: inherit; }
+
+  /* tabs */
+  nav { display: flex; gap: 2px; padding: 6px 8px 0; border-bottom: 1px solid var(--line); }
+  nav button { background: none; border: 0; padding: 5px 8px 6px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; font-weight: 600; font-size: 12px; }
+  nav button.on { color: var(--text); border-bottom-color: var(--accent); }
+  nav .sp { flex: 1; }
+  nav .icon { padding: 4px 6px; font-size: 12px; }
+
+  main { flex: 1; overflow-y: auto; padding: 8px 10px 6px; }
+  section.tab { display: none; } section.tab.on { display: block; }
+  h2 { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--muted); margin: 10px 0 6px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+  h2:first-child { margin-top: 4px; }
+  h2 .r { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .muted { color: var(--muted); font-size: 10.5px; }
+
+  /* chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; cursor: pointer; user-select: none; white-space: nowrap; }
+  .chip:hover { border-color: #5a5345; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .time .chip { min-width: 36px; text-align: center; font-size: 11px; padding: 4px 8px; }
+  .chip.custom { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; }
+  .chip.custom input { width: 38px; background: transparent; border: 0; outline: 0; text-align: right; font-weight: 700; font-size: 14px; }
+  .chip.custom.on input { color: var(--accent-ink); }
+  .app { display: inline-flex; align-items: center; gap: 6px; }
+  .app .dot { width: 8px; height: 8px; border-radius: 50%; background: #5a5345; }
+  .app.on .dot { background: var(--accent-ink); }
+
+  /* tasks list */
+  .list { display: flex; flex-direction: column; gap: 3px; }
+  .row { display: flex; align-items: center; gap: 7px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; cursor: pointer; }
+  .row.on { border-color: var(--accent); background: #33271a; }
+  .row .radio { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #6b6252; flex: none; }
+  .row.on .radio { border-color: var(--accent); background: radial-gradient(var(--accent) 45%, transparent 50%); }
+  .row .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .n { color: var(--muted); font-size: 10px; }
+  .row .x { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 2px 4px; border-radius: 5px; }
+  .row .x:hover { color: var(--text); background: #3a362e; }
+  .row .done-btn:hover { color: var(--ok); }
+  .add { width: 100%; background: var(--card); border: 1px dashed #5a5345; border-radius: 8px; padding: 6px 8px; outline: 0; font-size: 12px; }
+  .add:focus { border-style: solid; border-color: var(--accent); }
+
+  .switch { display: flex; align-items: center; gap: 8px; margin-top: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; cursor: pointer; }
+  .switch .k { width: 30px; height: 18px; border-radius: 9px; background: #4a453a; position: relative; flex: none; transition: background .2s; }
+  .switch .k::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: left .2s; }
+  .switch.on .k { background: var(--red); } .switch.on .k::after { left: 16px; }
+  .switch .l { flex: 1; } .switch .l b { display: block; font-size: 12px; }
+
+  footer { padding: 8px 10px 10px; border-top: 1px solid var(--line); }
+  .primary { width: 100%; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 10px; padding: 8px; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .primary:hover { filter: brightness(1.08); }
+  .primary:disabled { opacity: .5; cursor: default; }
+  .btns { display: flex; gap: 5px; } .btns button { flex: 1; background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
+  .btns button:hover { border-color: var(--accent); }
+  .btns button.good { background: var(--ok); border-color: var(--ok); color: #10200f; }
+
+  /* running session card */
+  .now { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; }
+  .now .ph { color: var(--muted); font-size: 11px; } .now .big { font-size: 28px; font-weight: 800; letter-spacing: 1px; margin: 2px 0; }
+  .now .task { color: #ffd9a8; font-weight: 600; margin-bottom: 6px; font-size: 12px; }
+  .now .apps { margin: 5px 0 10px; justify-content: center; }
+  .now .apps .chip { cursor: default; padding: 3px 8px; font-size: 10.5px; }
+
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .kpi { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  .kpi b { display: block; font-size: 20px; color: #fff; }
+  .link { background: none; border: 1px solid var(--line); border-radius: 8px; padding: 6px; width: 100%; cursor: pointer; margin-top: 6px; font-weight: 600; font-size: 12px; }
+  .link:hover { border-color: var(--accent); }
+  .empty { color: var(--muted); padding: 6px 2px; font-size: 12px; }
+</style>
+</head>
+<body>
+  <nav>
+    <button data-tab="start" class="on">Start</button>
+    <button data-tab="tasks">Tasks</button>
+    <button data-tab="today">Today</button>
+    <span class="sp"></span>
+    <button class="icon" id="gear" title="Settings" aria-label="Settings">⚙</button>
+  </nav>
+
+  <main>
+    <!-- ================= START ================= -->
+    <section class="tab on" id="tab-start">
+      <div id="setup">
+        <h2>How long? <span class="r muted" id="breakHint">5 min break after</span></h2>
+        <div class="chips time" id="times"></div>
+
+        <h2>What are you working on?</h2>
+        <div class="list" id="pickList"></div>
+        <input class="add" id="newTask" placeholder="+ New task…" style="margin-top:6px">
+
+        <h2>Apps for this session <span class="r"><button class="x" id="refresh" title="Refresh open apps" style="background:none;border:0;color:var(--muted);cursor:pointer">↻ refresh</button></span></h2>
+        <div class="chips" id="apps"><span class="muted">Looking for open apps…</span></div>
+        <input class="add" id="addApp" placeholder="+ Add app by process name (e.g. excel)" style="margin-top:6px">
+        <div class="switch on" id="strict">
+          <div class="l"><b>Lasers if I leave these apps</b><span class="muted" id="strictHint">Anything else during the session fires the lasers</span></div>
+          <div class="k"></div>
+        </div>
+      </div>
+
+      <div id="running" style="display:none">
+        <div class="now">
+          <div class="ph" id="nowPhase">Meditating</div>
+          <div class="big" id="nowTime">25:00</div>
+          <div class="task" id="nowTask"></div>
+          <div class="chips apps" id="nowApps"></div>
+          <div class="btns" id="nowBtns"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TASKS ================= -->
+    <section class="tab" id="tab-tasks">
+      <input class="add" id="taskAdd" placeholder="+ Add a task…  (“Call supplier 2p” = 2 sessions)">
+      <h2>Open</h2>
+      <div class="list" id="openList"></div>
+      <h2>Done today</h2>
+      <div class="list" id="doneList"></div>
+    </section>
+
+    <!-- ================= TODAY ================= -->
+    <section class="tab" id="tab-today">
+      <div class="kpis">
+        <div class="kpi"><b id="kFocus">0m</b><span class="muted">focused</span></div>
+        <div class="kpi"><b id="kSess">0</b><span class="muted">sessions</span></div>
+        <div class="kpi"><b id="kDone">0</b><span class="muted">tasks done</span></div>
+        <div class="kpi"><b id="kDis">0</b><span class="muted">distractions</span></div>
+      </div>
+      <button class="link" id="openReport">Open daily work report</button>
+      <button class="link" id="openSettings">Settings</button>
+    </section>
+  </main>
+
+  <footer id="foot"><button class="primary" id="go">Start 25 min focus</button></footer>
+
+<script src="launcher.js"></script>
+</body>
+</html>
