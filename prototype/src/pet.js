@@ -338,7 +338,7 @@ window.bodhi.on('state', st => {
   $('ring').setAttribute('stroke-dashoffset', (C * (1 - frac)).toFixed(1));
 
   const label = {
-    idle: 'Click to meditate',
+    idle: 'Click to start',
     focus: st.paused ? (st.pauseReason === 'away' ? `Waiting for you · ${fmt(st.remaining)}` : `Paused · ${fmt(st.remaining)}`) : fmt(st.remaining),
     waking: 'Session complete',
     walkingOut: 'Walking out…',
