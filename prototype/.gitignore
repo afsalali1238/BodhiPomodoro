@@ -7,3 +7,6 @@ build/
 *.exe
 *.dmg
 *.AppImage
+# Local data dir used when storage.js runs outside Electron (e.g. plain `node`/tests)
+.data/
+coverage/

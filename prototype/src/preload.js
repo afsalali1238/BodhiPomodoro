@@ -10,7 +10,6 @@ const { contextBridge, ipcRenderer } = require('electron');
  */
 const ALLOWED_CHANNELS = new Set([
   'state',
-  'walker',
   'report-date',
   'tasks-mode',
   'open-wizard',

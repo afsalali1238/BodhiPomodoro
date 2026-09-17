@@ -9,6 +9,13 @@
 
 ---
 
+> **Platform support:** Bodhi runs on Windows, macOS, and Linux as a focus timer and
+> desktop pet. The **distraction-detection lasers, "Pick from running apps," and
+> "Start with Windows"** features rely on a Windows-only foreground-window watcher
+> (native C#, compiled on the fly, with a PowerShell fallback) and are currently
+> **Windows-only**. On macOS/Linux those features are automatically disabled and
+> Bodhi still works great as a timer/desktop pet.
+
 ## 🌟 What is Bodhi Pomodoro?
 
 Traditional Pomodoro apps hide in your menu bar. Bodhi lives **on your screen**. 
@@ -67,6 +74,17 @@ npm install
 # 4. Start Bodhi!
 npm start
 ```
+
+## 🧪 Development
+
+```bash
+cd prototype
+npm install
+npm test        # unit tests (state machine, distraction rules, reports, storage)
+npm run lint    # ESLint
+```
+
+CI runs both on every push/PR (see `.github/workflows/ci.yml`).
 
 ## ⌨️ Shortcuts
 

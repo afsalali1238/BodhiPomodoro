@@ -3,7 +3,7 @@
  * @fileoverview Main process entry point for Bodhi Pomodoro desktop pet.
  * Wires together storage, state engine, window manager, IPC, and system tray.
  */
-const { app, globalShortcut, powerMonitor, screen, dialog, fs } = require('electron');
+const { app, globalShortcut, powerMonitor, screen, dialog } = require('electron');
 const storage = require('./storage');
 const state = require('./state');
 const windows = require('./windows');
@@ -27,7 +27,6 @@ app.on('second-instance', () => {
 state.setCallbacks({
   onStateChange: force => windows.pushState(force),
   onNotify: (title, body, onClick) => windows.notify(title, body, onClick),
-  onBlast: (tier, targetRect) => windows.fireBlast(tier, targetRect),
   onStopBlast: silent => windows.stopBlast(silent),
   onOpenLauncher: tab => windows.openLauncher(tab),
   onOpenReport: dateKey => windows.openReport(dateKey),
@@ -68,8 +67,11 @@ app.whenReady().then(() => {
   };
   for (const [accelerator, action] of Object.entries(shortcuts)) {
     try {
-      globalShortcut.register(accelerator, action);
-    } catch {}
+      const ok = globalShortcut.register(accelerator, action);
+      if (!ok) console.warn(`[main] Global shortcut ${accelerator} is already in use by another app; it will not work in Bodhi.`);
+    } catch (e) {
+      console.warn(`[main] Failed to register global shortcut ${accelerator}:`, e.message);
+    }
   }
 
   // Active window watcher

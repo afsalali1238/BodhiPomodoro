@@ -2,10 +2,15 @@
 
 A minimalist desktop focus timer with a monk character that sits beside you while you work.
 
+> **Platform note:** the timer, tree growth, tasks, and reports work on Windows, macOS,
+> and Linux. Distraction-detection lasers, "Pick from running apps," and "Start with
+> Windows" depend on a Windows-only foreground-window watcher and are disabled
+> elsewhere.
+
 ## Features
 
 - **Focus timer** with customizable session lengths
-- **Distraction detection** — lasers fire when you drift to blocked sites/apps
+- **Distraction detection** (Windows only) — lasers fire when you drift to blocked sites/apps
 - **Break reminders** — water, stretch, breathe, eye rest prompts  
 - **Tree growth** — your Bodhi tree grows as you complete sessions
 - **Daily reports** — track focus time, tasks completed, and distractions
@@ -17,6 +22,14 @@ A minimalist desktop focus timer with a monk character that sits beside you whil
 ```bash
 npm install
 npm start
+```
+
+## Development
+
+```bash
+npm test        # runs the node:test suite in tests/
+npm run lint    # ESLint (flat config in eslint.config.js)
+npm run lint:fix
 ```
 
 ## Usage
