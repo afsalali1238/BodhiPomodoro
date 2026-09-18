@@ -430,6 +430,9 @@ window.addEventListener('mousemove', e => {
 window.addEventListener('mouseup', () => {
   if (!down) return;
   if (down.act) {
+    // NOTE: this is the ONLY place control buttons ([data-act], incl. #ctl)
+    // dispatch. Do NOT add a separate 'click' listener for them — it would
+    // fire every press twice (double toggle / double open).
     if (down.act === 'timer') openWizard(1);
     else window.bodhi.petAction(down.act);
   } else {
@@ -437,11 +440,6 @@ window.addEventListener('mouseup', () => {
     if (!down.moved) window.bodhi.toggle();
   }
   down = null;
-});
-// control buttons (toggle/tasks/settings)
-svg.addEventListener('click', e => {
-  const ctl = e.target.closest('#ctl .btn');
-  if (ctl && ctl.dataset.act) window.bodhi.petAction(ctl.dataset.act);
 });
 
 svg.addEventListener('dblclick', e => {

@@ -27,6 +27,9 @@ let launcherWin = null;
 let blastTimers = [];
 let lastPushSec = -1;
 
+/** Last unexpected size we already corrected (loop guard, see lockPetSize). */
+let lastForcedSize = '';
+
 /** @type {(() => void)|null} */
 let onUpdateTrayCallback = null;
 
@@ -111,6 +114,29 @@ function movePetToDisplay() {
     pet.setBounds(petBounds());
     pushState(true);
   }
+}
+
+/**
+ * Snaps the pet window back to its computed size if anything unexpected
+ * tries to resize it (stray setBounds, DPI/drag quirks, duplicate events).
+ * Legitimate resizes always go through movePetToDisplay() which sets exactly
+ * petBounds(), so any deviation here is by definition drift — never correct.
+ * The lastForcedSize guard stops us fighting the platform if it snaps our
+ * correction back (avoids a resize-event loop).
+ */
+function lockPetSize() {
+  if (!pet || pet.isDestroyed()) return;
+  const want = petBounds();
+  const got = pet.getBounds();
+  if (got.width === want.width && got.height === want.height) {
+    lastForcedSize = '';
+    return;
+  }
+  const key = `${got.width}x${got.height}`;
+  if (key === lastForcedSize) return;
+  lastForcedSize = key;
+  console.warn(`[pet] Unexpected resize ${got.width}x${got.height}, restoring ${want.width}x${want.height}`);
+  pet.setSize(want.width, want.height);
 }
 
 /**
