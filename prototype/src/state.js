@@ -139,13 +139,32 @@ function pushState(force = true) {
   persistSession();
 }
 
+let cachedSum = null;
+let cachedSumAt = 0;
+let cachedSumKey = null;
+
+function getTodaySummary() {
+  const k = storage.todayKey();
+  const now = Date.now();
+  if (!cachedSum || cachedSumKey !== k || now - cachedSumAt > 4000) {
+    cachedSum = R.summarize(storage.getLog().days[k], {});
+    cachedSumAt = now;
+    cachedSumKey = k;
+  }
+  return cachedSum;
+}
+
+function invalidateTodaySummary() {
+  cachedSum = null;
+}
+
 /**
  * Serializes state for renderers.
  * @param {number} [petScale=1]
  */
 function publicState(petScale = 1) {
   const ct = currentTask();
-  const sum = R.summarize(storage.getLog().days[storage.todayKey()], {});
+  const sum = getTodaySummary();
   const watcherAvailable = isWatcherAvailableCallback ? isWatcherAvailableCallback() : false;
 
   return {
@@ -315,6 +334,7 @@ function commitSession() {
   S.isLongBreak = S.cycle % settings.cyclesBeforeLong === 0;
   storage.saveLog();
   storage.saveTasks();
+  invalidateTodaySummary();
 }
 
 function leaveForBreak() {
@@ -434,6 +454,7 @@ function completeTask(id) {
   }
   storage.saveTasks();
   storage.saveLog();
+  invalidateTodaySummary();
   pushState();
 }
 
@@ -453,6 +474,7 @@ function tick() {
       S.activeMs -= back;
       storage.day().awayMin += back / MIN;
       storage.saveLog();
+      invalidateTodaySummary();
       S.pausedRemaining = Math.min(S.total, remainingMs() + back);
       S.paused = true;
       S.pauseReason = 'away';
@@ -551,7 +573,7 @@ function restoreSession() {
     S.phase = 'waking';
     commitSession();
     S.phase = 'ready';
-  } else if (s.phase === 'break' && left > 0) {
+  } else if ((s.phase === 'break' || s.phase === 'walkingOut') && left > 0) {
     S.phase = 'break';
     S.activity = s.activity;
     S.breakStart = s.breakStart;

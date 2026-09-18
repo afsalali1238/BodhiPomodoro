@@ -28,3 +28,42 @@ test('writeJsonAtomic writes valid JSON and preserves data integrity', () => {
   const p = storage.file(testFile);
   if (fs.existsSync(p)) fs.unlinkSync(p);
 });
+
+test('normalizeSettings(): clamps numbers, sanitizes scale, and protects types', () => {
+  const bad = {
+    focusMin: -10,
+    breakMin: 999,
+    scale: 100,
+    displayId: 'not-a-number',
+    reportTime: 'invalid-time',
+    distractList: 'not-an-array'
+  };
+
+  const normalized = storage.normalizeSettings(bad);
+  assert.strictEqual(normalized.focusMin, 1);
+  assert.strictEqual(normalized.breakMin, 120);
+  assert.strictEqual(normalized.scale, 'auto');
+  assert.strictEqual(normalized.displayId, null);
+  assert.strictEqual(normalized.reportTime, storage.DEFAULTS.reportTime);
+  assert.deepStrictEqual(normalized.distractList, storage.DEFAULTS.distractList);
+});
+
+test('normalizeSettings(): retains valid custom settings', () => {
+  const good = {
+    focusMin: 50,
+    breakMin: 10,
+    scale: 1.5,
+    displayId: 12345,
+    reportTime: '19:30',
+    distractList: ['Reddit.com ', ' YouTube.com']
+  };
+
+  const normalized = storage.normalizeSettings(good);
+  assert.strictEqual(normalized.focusMin, 50);
+  assert.strictEqual(normalized.breakMin, 10);
+  assert.strictEqual(normalized.scale, 1.5);
+  assert.strictEqual(normalized.displayId, 12345);
+  assert.strictEqual(normalized.reportTime, '19:30');
+  assert.deepStrictEqual(normalized.distractList, ['reddit.com', 'youtube.com']);
+});
+

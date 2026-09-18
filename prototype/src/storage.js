@@ -233,18 +233,80 @@ function backupData() {
   }
 }
 
+const NUMERIC_LIMITS = {
+  focusMin: [1, 240],
+  breakMin: [1, 120],
+  longBreakMin: [1, 180],
+  cyclesBeforeLong: [1, 12],
+  laserMax: [0, 3],
+  graceSec: [0, 60],
+  cooldownSec: [5, 120],
+  awayPauseMin: [1, 30]
+};
+
+/**
+ * Normalizes and bounds settings to safe schema-compliant values.
+ * @param {Record<string, any>} s
+ * @returns {BodhiSettings}
+ */
+function normalizeSettings(s) {
+  const clean = { ...DEFAULTS, ...(s || {}) };
+
+  for (const [k, [lo, hi]] of Object.entries(NUMERIC_LIMITS)) {
+    const n = Math.round(Number(clean[k]));
+    clean[k] = Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : DEFAULTS[k];
+  }
+
+  const sc = Number(clean.scale);
+  clean.scale = (clean.scale === 'auto' || !Number.isFinite(sc) || sc < 0.4 || sc > 3) ? 'auto' : sc;
+
+  if (clean.displayId !== null && clean.displayId !== undefined) {
+    const d = Number(clean.displayId);
+    clean.displayId = Number.isFinite(d) && d !== 0 ? d : null;
+  } else {
+    clean.displayId = null;
+  }
+
+  const boolKeys = [
+    'alwaysOnTop', 'walkAcross', 'autoStartBreak', 'autoStartFocus',
+    'sound', 'lasers', 'hideInMeetings', 'hideFullscreen',
+    'breakNudge', 'askTaskOnStart', 'reduceMotion', 'autoStart'
+  ];
+  boolKeys.forEach(k => {
+    if (k in clean) clean[k] = Boolean(clean[k]);
+  });
+
+  if (!/^\d{2}:\d{2}$/.test(String(clean.reportTime))) {
+    clean.reportTime = DEFAULTS.reportTime;
+  }
+
+  ['distractList', 'allowList', 'focusApps'].forEach(k => {
+    if (Array.isArray(clean[k])) {
+      clean[k] = clean[k].map(x => String(x || '').trim().toLowerCase()).filter(Boolean);
+    } else {
+      clean[k] = [...DEFAULTS[k]];
+    }
+  });
+
+  if (!clean.positions || typeof clean.positions !== 'object' || Array.isArray(clean.positions)) {
+    clean.positions = {};
+  }
+
+  clean.schemaVersion = DEFAULTS.schemaVersion;
+  return clean;
+}
+
 /**
  * Initializes and loads persisted data on application launch.
  */
 function initStorage() {
   backupData();
   const loadedSettings = readJson('settings.json', {});
-  settings = { ...DEFAULTS, ...loadedSettings };
+  const merged = normalizeSettings(loadedSettings);
+  settings = merged;
 
-  // Migrations
-  if ((settings.schemaVersion || 1) < 4) {
-    if (settings.scale === 1 || Number(settings.scale) > 3) settings.scale = 'auto';
-    settings.schemaVersion = 4;
+  // Persist the repair if loaded settings were corrupted, missing, or had out-of-bound values
+  if (JSON.stringify(merged) !== JSON.stringify(loadedSettings)) {
     saveSettings();
   }
 
@@ -254,6 +316,8 @@ function initStorage() {
 
 module.exports = {
   DEFAULTS,
+  NUMERIC_LIMITS,
+  normalizeSettings,
   file,
   readJson,
   writeJsonAtomic,
@@ -269,3 +333,4 @@ module.exports = {
   getTasksDb: () => tasksDb,
   getLog: () => log
 };
+
