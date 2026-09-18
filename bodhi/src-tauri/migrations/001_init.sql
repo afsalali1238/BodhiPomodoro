@@ -1,0 +1,67 @@
+-- Bodhi v1 schema: days, sessions, breaks, distractions, tasks.
+-- Kept idempotent (IF NOT EXISTS) so re-runs are always safe.
+
+CREATE TABLE IF NOT EXISTS days (
+  date TEXT PRIMARY KEY,
+  away_min REAL NOT NULL DEFAULT 0,
+  notes TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL DEFAULT '',
+  start_ms INTEGER NOT NULL DEFAULT 0,
+  end_ms INTEGER NOT NULL DEFAULT 0,
+  minutes REAL NOT NULL DEFAULT 0,
+  task_id TEXT NULL,
+  task_title TEXT NULL,
+  distractions INTEGER NOT NULL DEFAULT 0,
+  extended INTEGER NOT NULL DEFAULT 0,
+  apps_json TEXT NOT NULL DEFAULT '[]'
+);
+CREATE INDEX IF NOT EXISTS idx_sessions_date ON sessions (date);
+
+CREATE TABLE IF NOT EXISTS breaks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL DEFAULT '',
+  start_ms INTEGER NOT NULL DEFAULT 0,
+  minutes REAL NOT NULL DEFAULT 0,
+  activity TEXT NOT NULL DEFAULT '',
+  done INTEGER NOT NULL DEFAULT 0,
+  is_long INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_breaks_date ON breaks (date);
+
+CREATE TABLE IF NOT EXISTS distractions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL DEFAULT '',
+  at_ms INTEGER NOT NULL DEFAULT 0,
+  rule TEXT NOT NULL DEFAULT '',
+  tier INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_distractions_date ON distractions (date);
+
+CREATE TABLE IF NOT EXISTS completed_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  date TEXT NOT NULL DEFAULT '',
+  task_id TEXT NOT NULL DEFAULT '',
+  title TEXT NOT NULL DEFAULT '',
+  at_ms INTEGER NOT NULL DEFAULT 0,
+  sessions INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL DEFAULT '',
+  estimate INTEGER NOT NULL DEFAULT 1,
+  sessions_done INTEGER NOT NULL DEFAULT 0,
+  done INTEGER NOT NULL DEFAULT 0,
+  created_ms INTEGER NOT NULL DEFAULT 0,
+  done_ms INTEGER NULL,
+  sort INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS meta (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL DEFAULT ''
+);

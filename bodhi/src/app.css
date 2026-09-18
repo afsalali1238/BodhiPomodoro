@@ -1,0 +1,67 @@
+/* Bodhi design tokens + shell reset. Component styles live in App.svelte. */
+:root {
+  --bg: #1b1a17;
+  --panel: rgba(28, 24, 20, 0.92);
+  --ink: #eee3cc;
+  --muted: #a89c85;
+  --accent: #f59a3c;
+  --accent-hi: #ffb054;
+  --cream: #ffd9a8;
+  --danger: #ff6b5b;
+  --radius: 10px;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  user-select: none;
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    sans-serif;
+  color: var(--ink);
+}
+
+/* ---- Injected-art rules (art.ts renders via {@html}, so these stay global) ---- */
+
+/* idle listening pose: headphones on, blessing hand tucked away */
+.idle .arm-lap {
+  opacity: 0;
+}
+.idle.listening .headphones {
+  opacity: 1;
+}
+.idle.listening .arm-raised {
+  opacity: 0;
+}
+
+/* gentle canopy sway */
+.canopy {
+  animation: sway 7s ease-in-out infinite;
+  transform-origin: 100px 250px;
+  transform-box: view-box;
+}
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-0.6deg);
+  }
+  50% {
+    transform: rotate(0.6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canopy {
+    animation: none;
+  }
+}

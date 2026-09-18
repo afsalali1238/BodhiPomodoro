@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "M0: pet window can be dragged and can receive state events. App-defined commands are allowed by default.",
+  "windows": ["pet"],
+  "permissions": ["core:window:allow-start-dragging", "core:event:default"]
+}

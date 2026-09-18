@@ -25,7 +25,7 @@ Personality: calm, warm, slightly playful. He never shames — he nudges. Comedy
 | Frontend | **Svelte 5 + TypeScript + Vite** (plain SPA, no SvelteKit) | Smallest quality framework runtime (~few KB), simplest reactivity for a pet UI |
 | Styling | **Hand-written CSS with design tokens** (no Tailwind/Bootstrap) | This UI is bespoke SVG art + small panels; a CSS framework is dead weight |
 | Art | **Procedural inline SVG** (all art generated in code) | Zero image assets, infinitely scalable, DPI-perfect, tiny |
-| Storage | **SQLite** (`tauri-plugin-sql`) for sessions/tasks/logs + **Store** (`tauri-plugin-store`) for settings/window prefs | Single-file DB, crash-safe, trivial reporting queries; no server |
+| Storage | **SQLite via `sqlx` directly in Rust** for sessions/tasks/logs + **Store** (`tauri-plugin-store`, Rust-side) for settings/window prefs | Single-file DB, crash-safe, trivial reporting queries; no server; zero SQL JS-permissions needed since the backend owns all data |
 | Window watcher | **Native Rust** (`windows` crate on Windows; `core-graphics`/`appkit` on macOS; best-effort X11 on Linux) | Replaces the old C#-compile-on-the-fly hack with one clean native module |
 | Idle detection | Rust (`user-idle` crate or platform APIs) | Away detection without JS polling |
 | Global shortcuts | `tauri-plugin-global-shortcut` | |
