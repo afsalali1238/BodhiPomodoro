@@ -73,14 +73,6 @@ jobs:
       - name: Check formatting
         run: cargo fmt --check
 
-      # TEMP-DEBUG: sandbox can't download CI logs, so surface the fmt diff
-      # as a check annotation (readable via API). REMOVE after M0 is green.
-      - name: Report fmt diff
-        if: failure() && matrix.os == 'ubuntu-latest'
-        run: |
-          DIFF=$(cargo fmt --check 2>&1 | head -c 30000 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/%0A/g')
-          echo "::error title=Rustfmt diff::$DIFF"
-
       - name: Clippy (warnings denied)
         run: cargo clippy --all-targets -- -D warnings
 

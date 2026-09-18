@@ -18,7 +18,9 @@ pub async fn connect(app: &tauri::App) -> Result<SqlitePool, DbError> {
         .max_connections(1)
         .connect_with(options)
         .await?;
-    sqlx::query("PRAGMA journal_mode=WAL;").execute(&pool).await?;
+    sqlx::query("PRAGMA journal_mode=WAL;")
+        .execute(&pool)
+        .await?;
     sqlx::migrate!("./migrations").run(&pool).await?;
     Ok(pool)
 }

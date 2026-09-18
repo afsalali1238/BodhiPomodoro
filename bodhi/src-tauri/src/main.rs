@@ -47,7 +47,10 @@ fn main() {
                 let store = store.clone();
                 pet.on_window_event(move |event| {
                     if let WindowEvent::Moved(position) = event {
-                        store.set(POS_KEY.to_string(), serde_json::json!([position.x, position.y]));
+                        store.set(
+                            POS_KEY.to_string(),
+                            serde_json::json!([position.x, position.y]),
+                        );
                     }
                 });
             }
@@ -73,7 +76,10 @@ fn main() {
 
 #[tauri::command]
 fn get_state(state: tauri::State<'_, Mutex<AppState>>) -> PetSnapshot {
-    state.lock().map(|guard| guard.snapshot()).unwrap_or_default()
+    state
+        .lock()
+        .map(|guard| guard.snapshot())
+        .unwrap_or_default()
 }
 
 #[tauri::command]
