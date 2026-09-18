@@ -108,7 +108,7 @@ To run Bodhi locally from the source:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/afsalali1238/petsid.git
+git clone https://github.com/afsalali1238/BodhiPomodoro.git
 
 # 2. Enter the prototype directory
 cd prototype
