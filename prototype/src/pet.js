@@ -266,7 +266,7 @@ function renderStep3Content() {
       </div>
       <button class="wiz-close-btn" id="wizBtnClose" title="Close">✕</button>
     </div>
-    <div class="wiz-chips" id="wizAppChips" style="max-height:56px; overflow-y:auto;">
+    <div class="wiz-chips" id="wizAppChips" style="max-height:72px; overflow-y:auto;">
       ${appList.length ? appList.map(a => {
         const isSel = wizData.focusApps.some(p => p.toLowerCase() === a.process.toLowerCase());
         return `<div class="wiz-chip${isSel ? ' on' : ''}" data-proc="${escHtml(a.process)}">${escHtml(a.name)}</div>`;
