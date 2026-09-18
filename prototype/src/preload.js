@@ -3,7 +3,13 @@
  * @fileoverview Secure Electron preload script.
  * Exposes strictly typed and whitelisted domain APIs via contextBridge without arbitrary IPC access.
  */
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webFrame } = require('electron');
+
+try {
+  webFrame.setVisualZoomLevelLimits(1, 1);
+} catch {
+  // webFrame may be undefined in certain test mock contexts
+}
 
 /**
  * Whitelist of permissible event channels from main process to renderer.

@@ -37,57 +37,72 @@
     <div class="btns"><button data-a="start" id="startBtn">Start</button><button data-a="skip">Skip</button><button data-a="reset">Reset</button></div></div>
 
   <fieldset><legend>Timing (minutes)</legend>
-    <div class="presets">
-      <button data-p="25,5,15">25/5</button><button data-p="15,3,10">15/3</button>
-      <button data-p="50,10,20">50/10</button><button data-p="90,20,30">90/20</button><button data-p="1,1,2">Test 1/1</button>
-    </div>
     <div class="row"><label for="focusMin">Meditation (focus)</label><input id="focusMin" type="number" min="1" max="240" step="1"></div>
     <div class="row"><label for="breakMin">Short walk (break)</label><input id="breakMin" type="number" min="1" max="120" step="1"></div>
-    <div class="row"><label for="longBreakMin">Long walk</label><input id="longBreakMin" type="number" min="1" max="180" step="1"></div>
-    <div class="row"><label for="cyclesBeforeLong">Long walk every</label><input id="cyclesBeforeLong" type="number" min="1" max="12" step="1"></div>
   </fieldset>
 
-  <fieldset><legend>Screen</legend>
-    <div class="row"><label for="displayId">Show on</label><select id="displayId"></select></div>
-    <div class="row"><label for="scale">Size</label>
+  <fieldset><legend>Screen & Audio</legend>
+    <div class="row"><label for="scale">Pet Size</label>
       <select id="scale"><option value="auto">Auto (fits screen)</option><option value="0.4">40%</option><option value="0.5">50%</option><option value="0.6">60%</option><option value="0.75">75%</option><option value="1">100%</option><option value="1.25">125%</option><option value="1.5">150%</option><option value="2">200%</option><option value="3">300%</option></select></div>
-    <div class="row"><label for="alwaysOnTop">Always on top</label><input id="alwaysOnTop" type="checkbox"></div>
-  </fieldset>
-
-  <fieldset><legend>Behaviour</legend>
-    <div class="row"><label for="walkAcross">Walk across the screen on break</label><input id="walkAcross" type="checkbox"></div>
-    <div class="row"><label for="autoStartBreak">Start break timer automatically</label><input id="autoStartBreak" type="checkbox"></div>
-    <div class="row"><label for="autoStartFocus">Sit again automatically after break</label><input id="autoStartFocus" type="checkbox"></div>
     <div class="row"><label for="sound">Bell sound</label><input id="sound" type="checkbox"></div>
-    <div class="row"><label for="autoStart">Start with Windows</label><input id="autoStart" type="checkbox"></div>
   </fieldset>
 
-  <fieldset><legend>Focus apps (lasers fire outside these)</legend>
-    <div class="row"><label>Process names (one per line, e.g. chrome, Code, winword)</label><textarea id="focusApps" rows="4"></textarea></div>
-    <div class="row"><label></label><button id="pickApps" type="button" style="padding:4px 10px;font-size:12px">Pick from running apps…</button></div>
+  <fieldset><legend>Distraction Lasers</legend>
+    <div class="row"><label for="lasers">Enable laser tracking</label><input id="lasers" type="checkbox"></div>
   </fieldset>
 
-  <fieldset><legend>Lasers</legend>
-    <div class="row"><label for="lasers">Enabled</label><input id="lasers" type="checkbox"></div>
-    <div class="row"><label for="laserMax">Max tier</label><input id="laserMax" type="number" min="0" max="3" step="1"></div>
-    <div class="row"><label for="graceSec">Grace (sec)</label><input id="graceSec" type="number" min="0" max="60" step="1"></div>
-    <div class="row"><label for="cooldownSec">Cooldown (sec)</label><input id="cooldownSec" type="number" min="5" max="120" step="1"></div>
-  </fieldset>
+  <details style="margin: 10px 0 14px;">
+    <summary style="color:#f59a3c; cursor:pointer; font-size:11.5px; font-weight:600; padding:4px 0; outline:none; user-select:none;">▸ Advanced Settings</summary>
 
-  <fieldset><legend>Focus protection</legend>
-    <div class="row"><label for="awayPauseMin">Away pause (min)</label><input id="awayPauseMin" type="number" min="1" max="30" step="1"></div>
-    <div class="row"><label for="hideInMeetings">Hide in meetings</label><input id="hideInMeetings" type="checkbox"></div>
-    <div class="row"><label for="hideFullscreen">Hide in fullscreen</label><input id="hideFullscreen" type="checkbox"></div>
-    <div class="row"><label for="askTaskOnStart">Ask for task on start</label><input id="askTaskOnStart" type="checkbox"></div>
-  </fieldset>
+    <div style="margin-top: 10px;">
+      <fieldset><legend>Timing Presets & Long Walk</legend>
+        <div class="presets" style="margin-bottom:8px">
+          <button data-p="25,5,15">25/5</button><button data-p="15,3,10">15/3</button>
+          <button data-p="50,10,20">50/10</button><button data-p="90,20,30">90/20</button><button data-p="1,1,2">Test 1/1</button>
+        </div>
+        <div class="row"><label for="longBreakMin">Long walk (break)</label><input id="longBreakMin" type="number" min="1" max="180" step="1"></div>
+        <div class="row"><label for="cyclesBeforeLong">Long walk every</label><input id="cyclesBeforeLong" type="number" min="1" max="12" step="1"></div>
+      </fieldset>
 
-  <fieldset><legend>Break & Report</legend>
-    <div class="row"><label for="breakNudge">Break nudge</label><input id="breakNudge" type="checkbox"></div>
-    <div class="row"><label for="reportTime">Report time</label><input id="reportTime" type="time" value="18:00"></div>
-    <div class="row"><label for="reduceMotion">Reduce laser motion</label><input id="reduceMotion" type="checkbox"></div>
-    <div class="row"><label>Distractions (one per line)</label><textarea id="distractList" rows="4"></textarea></div>
-    <div class="row"><label>Allow list (one per line)</label><textarea id="allowList" rows="4"></textarea></div>
-  </fieldset>
+      <fieldset><legend>Display & Placement</legend>
+        <div class="row"><label for="displayId">Show on</label><select id="displayId"></select></div>
+        <div class="row"><label for="alwaysOnTop">Always on top</label><input id="alwaysOnTop" type="checkbox"></div>
+      </fieldset>
+
+      <fieldset><legend>Behaviour</legend>
+        <div class="row"><label for="walkAcross">Walk across screen on break</label><input id="walkAcross" type="checkbox"></div>
+        <div class="row"><label for="autoStartBreak">Start break automatically</label><input id="autoStartBreak" type="checkbox"></div>
+        <div class="row"><label for="autoStartFocus">Sit again automatically</label><input id="autoStartFocus" type="checkbox"></div>
+        <div class="row"><label for="autoStart">Start with Windows</label><input id="autoStart" type="checkbox"></div>
+      </fieldset>
+
+      <fieldset><legend>Focus apps (lasers fire outside these)</legend>
+        <div class="row"><label>Process names</label><textarea id="focusApps" rows="3"></textarea></div>
+        <div class="row"><label></label><button id="pickApps" type="button" style="padding:4px 10px;font-size:12px">Pick running apps…</button></div>
+      </fieldset>
+
+      <fieldset><legend>Laser Details</legend>
+        <div class="row"><label for="laserMax">Max tier</label><input id="laserMax" type="number" min="0" max="3" step="1"></div>
+        <div class="row"><label for="graceSec">Grace (sec)</label><input id="graceSec" type="number" min="0" max="60" step="1"></div>
+        <div class="row"><label for="cooldownSec">Cooldown (sec)</label><input id="cooldownSec" type="number" min="5" max="120" step="1"></div>
+        <div class="row"><label for="reduceMotion">Reduce laser motion</label><input id="reduceMotion" type="checkbox"></div>
+      </fieldset>
+
+      <fieldset><legend>Focus Protection & Reporting</legend>
+        <div class="row"><label for="awayPauseMin">Away pause (min)</label><input id="awayPauseMin" type="number" min="1" max="30" step="1"></div>
+        <div class="row"><label for="hideInMeetings">Hide in meetings</label><input id="hideInMeetings" type="checkbox"></div>
+        <div class="row"><label for="hideFullscreen">Hide in fullscreen</label><input id="hideFullscreen" type="checkbox"></div>
+        <div class="row"><label for="askTaskOnStart">Ask for task on start</label><input id="askTaskOnStart" type="checkbox"></div>
+        <div class="row"><label for="breakNudge">Break nudge</label><input id="breakNudge" type="checkbox"></div>
+        <div class="row"><label for="reportTime">Report time</label><input id="reportTime" type="time" value="18:00"></div>
+      </fieldset>
+
+      <fieldset><legend>Lists</legend>
+        <div class="row"><label>Distractions (per line)</label><textarea id="distractList" rows="3"></textarea></div>
+        <div class="row"><label>Allow list (per line)</label><textarea id="allowList" rows="3"></textarea></div>
+      </fieldset>
+    </div>
+  </details>
   <div class="foot"><button id="save" class="primary">Save</button></div>
 <script src="utils.js"></script>
 <script src="settings.js"></script>

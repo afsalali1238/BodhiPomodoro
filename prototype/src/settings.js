@@ -44,7 +44,8 @@ $('save').onclick = () => {
   time.forEach(k => s[k] = $(k).value);
   textareas.forEach(k => s[k] = $(k).value.trim().split('\n').map(x => x.trim()).filter(Boolean));
   s.scale = $('scale').value === 'auto' ? 'auto' : Number($('scale').value);
-  s.displayId = Number($('displayId').value);
+  const dispVal = Number($('displayId')?.value);
+  if (dispVal) s.displayId = dispVal;
   window.bodhi.saveSettings(s);
   $('save').textContent = 'Saved ✓';
   setTimeout(() => $('save').textContent = 'Save', 1200);

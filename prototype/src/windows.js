@@ -143,8 +143,8 @@ function smallWindow(win, htmlFile, opts) {
 
 function openSettings() {
   settingsWin = smallWindow(settingsWin, 'settings.html', {
-    width: 420,
-    height: 720,
+    width: 380,
+    height: 440,
     title: 'Bodhi Pomodoro — Settings'
   });
 }

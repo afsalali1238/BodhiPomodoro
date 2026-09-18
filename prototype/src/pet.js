@@ -369,6 +369,10 @@ window.bodhi.on('state', st => {
   $('pillRect').setAttribute('y', two ? (compact ? '-17' : '-14') : '-12');
   $('pillRect').setAttribute('height', two ? (compact ? '34' : '29') : (compact ? '26' : '24'));
 
+  // update start/pause button text
+  const running = st.phase === 'focus' || st.phase === 'break';
+  if ($('ctlToggle')) $('ctlToggle').textContent = running ? (st.paused ? '▶' : '⏸') : '▶';
+
   $('signText').textContent = st.nudged && !st.activityDone ? 'rest, please' : (SIGN[st.activity] || 'rest');
   $('signSub').textContent = st.activityDone ? 'done ✓' : 'tap when done';
 

@@ -77,7 +77,7 @@ try {
 
 /** @type {BodhiSettings} */
 const DEFAULTS = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   focusMin: 25,
   breakMin: 5,
   longBreakMin: 15,
@@ -242,9 +242,9 @@ function initStorage() {
   settings = { ...DEFAULTS, ...loadedSettings };
 
   // Migrations
-  if ((settings.schemaVersion || 1) < 3) {
-    if (settings.scale === 1) settings.scale = 'auto';
-    settings.schemaVersion = 3;
+  if ((settings.schemaVersion || 1) < 4) {
+    if (settings.scale === 1 || Number(settings.scale) > 3) settings.scale = 'auto';
+    settings.schemaVersion = 4;
     saveSettings();
   }
 
