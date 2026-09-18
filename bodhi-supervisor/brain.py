@@ -2,25 +2,20 @@
 """Brain module - LLM integration for evaluating user focus and generating pushback."""
 
 import os
-import json
-from pathlib import Path
-from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()
 
-STATE_FILE = Path(__file__).parent / "state.json"
-
 
 class Brain:
     """Handles LLM communication for focus evaluation and pushback generation."""
-    
+
     def __init__(self, provider: str = "openai", project_path: str = "."):
         self.provider = provider
         self.project_path = project_path
         self.client = None
         self._init_client()
-    
+
     def _init_client(self) -> None:
         """Initialize the LLM client based on available API keys."""
         if self.provider == "openai":
@@ -35,18 +30,18 @@ class Brain:
                 import google.generativeai as genai
                 genai.configure(api_key=api_key)
                 self.client = genai.GenerativeModel("gemini-1.5-flash")
-        
+
         if not self.client:
             raise ValueError(
                 f"No API key found for {self.provider}. "
                 "Set OPENAI_API_KEY or GEMINI_API_KEY in .env"
             )
-    
+
     def build_prompt(self, goal: str, activity_log: list) -> str:
         """Build the evaluation prompt for the LLM."""
         recent = activity_log[-15:] if activity_log else []
         activity_str = "\n".join(f"- {a}" for a in recent) if recent else "No activity recorded yet."
-        
+
         return f"""You are 'Bodhi', a strict but helpful AI Tech Lead.
 The user's declared goal for this session is: "{goal}"
 Here is their activity log for the last 15 minutes:
@@ -55,30 +50,36 @@ Here is their activity log for the last 15 minutes:
 Your task:
 1. Determine if their activity aligns with their goal.
 2. If they are ON TRACK, output exactly: "OK"
-3. If they are OFF TRACK (distracted, procrastinating, or over-engineering), provide a short, sharp pushback message (max 2 sentences). Call out specifically what they are doing wrong and remind them of the goal."""
-    
+3. If they are OFF TRACK (distracted, procrastinating, or over-engineering), \
+provide a short, sharp pushback message (max 2 sentences). Call out specifically \
+what they are doing wrong and remind them of the goal."""
+
     def evaluate(self, goal: str, activity_log: list) -> str:
         """Evaluate user activity against goal using LLM."""
         prompt = self.build_prompt(goal, activity_log)
-        
+
         if self.provider == "openai":
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are Bodhi, an assertive AI Tech Lead. Respond only with 'OK' or a pushback message."},
+                    {
+                        "role": "system",
+                        "content": ("You are Bodhi, an assertive AI Tech Lead. "
+                                    "Respond only with 'OK' or a pushback message.")
+                    },
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.3,
                 max_tokens=100
             )
             return response.choices[0].message.content.strip()
-        
+
         elif self.provider == "gemini":
             response = self.client.generate_content(prompt)
             return response.text.strip()
-        
+
         return "OK"
-    
+
     def suggest_next_task(self, goal: str, git_diff: str, recent_files: list) -> str:
         """Suggest the next high-priority task based on codebase state."""
         # Build context package from git
@@ -91,7 +92,7 @@ Your task:
             ).stdout.strip() or "No recent commits"
         except Exception:
             recent_commits = "Error reading git log"
-        
+
         try:
             git_status = subprocess.run(
                 ["git", "status", "--short"],
@@ -100,8 +101,9 @@ Your task:
             ).stdout.strip() or "Clean"
         except Exception:
             git_status = "Error reading git status"
-        
-        prompt = f"""Based on this git state and the user's current goal, what is the single most logical next coding task? Provide it as a 1-sentence instruction.
+
+        prompt = f"""Based on this git state and the user's current goal, what is \
+the single most logical next coding task? Provide it as a 1-sentence instruction.
 
 Goal: "{goal}"
 
@@ -116,23 +118,27 @@ File Changes (stat):
 
 Recent file activity:
 {chr(10).join(f"- {f}" for f in recent_files[-10:])}"""
-        
+
         if self.provider == "openai":
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are Bodhi, an AI Tech Lead. Output one specific next task as a single sentence."},
+                    {
+                        "role": "system",
+                        "content": ("You are Bodhi, an AI Tech Lead. Output one "
+                                    "specific next task as a single sentence.")
+                    },
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.4,
                 max_tokens=150
             )
             return response.choices[0].message.content.strip()
-        
+
         elif self.provider == "gemini":
             response = self.client.generate_content(prompt)
             return response.text.strip()
-        
+
         return "Continue with current task."
 
 

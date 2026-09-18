@@ -1,9 +1,11 @@
 // Pure daily-report builder (used by main for notifications and by the report window).
 (function (root) {
-  const hm = min => {
-    const m = Math.round(min);
-    return m >= 60 ? `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m` : `${m}m`;
-  };
+  // hm lives in the shared utils module: required directly under Node, and
+  // loaded as window.BodhiUtils in the report window (utils.js is included
+  // before this script in report.html).
+  const U = (typeof module !== 'undefined' && module.exports && typeof require === 'function')
+    ? require('./utils') : root.BodhiUtils;
+  const hm = U.hm;
   const clock = ts => { const d = new Date(ts); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
   const ACT = { water: 'Drank water', breathe: 'Breathing exercise', stretch: 'Stretched', eyes: 'Rested eyes (look far away)', coffee: 'Coffee / tea break', walk: 'Short walk' };
 

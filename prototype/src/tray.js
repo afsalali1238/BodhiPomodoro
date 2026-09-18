@@ -11,7 +11,7 @@ const windows = require('./windows');
 /** @type {Tray|null} */
 let tray = null;
 
-const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const { fmt } = require('./utils');
 
 function labelFor() {
   const S = state.S;
