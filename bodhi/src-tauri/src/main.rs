@@ -47,10 +47,7 @@ fn main() {
                 let store = store.clone();
                 pet.on_window_event(move |event| {
                     if let WindowEvent::Moved(position) = event {
-                        store.set(
-                            POS_KEY.to_string(),
-                            serde_json::json!([position.x, position.y]),
-                        );
+                        store.set(POS_KEY.to_string(), serde_json::json!([position.x, position.y]));
                     }
                 });
             }

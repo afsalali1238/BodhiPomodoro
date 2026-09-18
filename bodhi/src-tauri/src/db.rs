@@ -2,8 +2,7 @@
 //! the frontend needs no SQL permissions — every query hides behind a
 //! typed Tauri command. Single-connection pool + WAL mode.
 
-use sqlx::sqlite::{SqliteConnectOptions, SqlitePoolOptions};
-use sqlx::SqlitePool;
+use sqlx::sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use tauri::Manager;
 
 pub type DbError = Box<dyn std::error::Error + Send + Sync>;
