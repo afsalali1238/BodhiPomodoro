@@ -452,5 +452,10 @@ svg.addEventListener('contextmenu', e => {
 window.addEventListener('keydown', e => {
   if (e.key === 'Escape' && wizStep > 0) {
     closeWizard();
+  } else if (e.ctrlKey && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '_' || e.key === '0')) {
+    e.preventDefault();
   }
 });
+window.addEventListener('wheel', e => {
+  if (e.ctrlKey) e.preventDefault();
+}, { passive: false });

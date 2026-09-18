@@ -79,8 +79,14 @@ const prefs = () => ({
  */
 function createPet() {
   const settings = storage.getSettings();
+  const b = petBounds();
   pet = new BrowserWindow({
-    ...petBounds(),
+    ...b,
+    minWidth: b.width,
+    maxWidth: b.width,
+    minHeight: b.height,
+    maxHeight: b.height,
+    useContentSize: true,
     transparent: true,
     frame: false,
     resizable: false,
@@ -99,7 +105,25 @@ function createPet() {
     pet?.show();
     pet?.focus();
   });
-  pet.webContents.on('did-finish-load', () => pushState(true));
+  pet.webContents.on('did-finish-load', () => {
+    try {
+      pet?.webContents.setVisualZoomLevelLimits(1, 1);
+      pet?.webContents.setZoomFactor(1);
+    } catch {
+      // ignore
+    }
+    pushState(true);
+  });
+  pet.webContents.on('zoom-changed', e => {
+    e.preventDefault();
+    if (pet && !pet.isDestroyed()) {
+      try {
+        pet.webContents.setZoomFactor(1);
+      } catch {
+        // ignore
+      }
+    }
+  });
   // Fallback: show if ready-to-show doesn't fire within 2 seconds
   setTimeout(() => {
     if (pet && !pet.isDestroyed()) pet.show();
@@ -108,8 +132,15 @@ function createPet() {
 
 function movePetToDisplay() {
   if (pet && !pet.isDestroyed()) {
-    pet.setBounds(petBounds());
-    pushState(true);
+    const target = petBounds();
+    const cur = pet.getBounds();
+    if (Math.abs(cur.width - target.width) > 1 || Math.abs(cur.height - target.height) > 1 ||
+        Math.abs(cur.x - target.x) > 1 || Math.abs(cur.y - target.y) > 1) {
+      pet.setMinimumSize(target.width, target.height);
+      pet.setMaximumSize(target.width, target.height);
+      pet.setBounds(target);
+      pushState(true);
+    }
   }
 }
 
@@ -233,11 +264,15 @@ function pushState(force = true) {
 
 function requestStart() {
   const S = state.S;
+  if (S.phase === 'ready') {
+    state.sit();
+    return;
+  }
   if (S.phase === 'focus' || S.phase === 'break') {
     S.paused ? state.resume() : state.pause('user');
     return;
   }
-  if (S.phase !== 'idle' && S.phase !== 'ready') return;
+  if (S.phase !== 'idle') return;
   if (pet && !pet.isDestroyed()) {
     pet.webContents.send('open-wizard');
   } else {

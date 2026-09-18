@@ -58,9 +58,12 @@ function buildMenu() {
     ...(ct ? [{ label: `Task: ${ct.title}`, enabled: false }] : []),
     { type: 'separator' },
     {
-      label: running ? (S.paused ? 'Resume' : 'Pause') : 'Start focus',
+      label: running ? (S.paused ? 'Resume' : 'Pause') : (S.phase === 'ready' ? 'Sit down' : 'Start focus'),
       accelerator: 'Ctrl+Alt+P',
-      click: windows.requestStart
+      click: () => {
+        if (S.phase === 'ready') state.sit();
+        else windows.requestStart();
+      }
     },
     {
       label: 'Skip',

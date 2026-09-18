@@ -3,7 +3,8 @@
  * @fileoverview Main process entry point for Bodhi Pomodoro desktop pet.
  * Wires together storage, state engine, window manager, IPC, and system tray.
  */
-const { app, globalShortcut, powerMonitor, screen, dialog } = require('electron');
+const { app, globalShortcut, powerMonitor, screen, dialog, Menu } = require('electron');
+Menu.setApplicationMenu(null);
 const storage = require('./storage');
 const state = require('./state');
 const windows = require('./windows');

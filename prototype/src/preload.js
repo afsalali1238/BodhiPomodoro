@@ -6,6 +6,8 @@
 const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
 try {
+  webFrame.setZoomLevel(0);
+  webFrame.setZoomFactor(1);
   webFrame.setVisualZoomLevelLimits(1, 1);
 } catch {
   // webFrame may be undefined in certain test mock contexts

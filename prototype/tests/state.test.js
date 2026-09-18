@@ -194,6 +194,19 @@ test('reset(): leaves state untouched when the user cancels the confirmation', a
   assert.strictEqual(state.S.phase, 'focus');
 });
 
+test('sit(): transitions ready -> idle', () => {
+  const { state } = freshState();
+  withCallbacks(state);
+  state.S.phase = 'ready';
+  state.sit();
+  assert.strictEqual(state.S.phase, 'idle');
+
+  // No-op when not in ready phase
+  state.S.phase = 'focus';
+  state.sit();
+  assert.strictEqual(state.S.phase, 'focus');
+});
+
 test('treeStage(): grows with total completed sessions', () => {
   const { state, storage } = freshState();
   const log = storage.getLog();

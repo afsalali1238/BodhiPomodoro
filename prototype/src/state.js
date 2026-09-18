@@ -433,6 +433,12 @@ async function reset() {
   pushState();
 }
 
+function sit() {
+  if (S.phase !== 'ready') return;
+  S.phase = 'idle';
+  pushState();
+}
+
 async function demoWalk() {
   await reset();
   if (S.phase !== 'idle') return;
@@ -604,6 +610,7 @@ module.exports = {
   finishBreak,
   skip,
   reset,
+  sit,
   demoWalk,
   completeTask,
   persistSession,
