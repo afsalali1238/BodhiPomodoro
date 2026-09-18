@@ -16,11 +16,16 @@
   legend { color: #a89c85; padding: 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
   .row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; gap: 10px; }
   input[type=number] { width: 64px; }
-  input, select, button { background: #2c2a24; color: #eee3cc; border: 1px solid #4a453a; border-radius: 6px; padding: 4px 6px; font: inherit; }
+  input, select, button, textarea { background: #2c2a24; color: #eee3cc; border: 1px solid #4a453a; border-radius: 8px; padding: 4px 8px; font: inherit; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #f59a3c; box-shadow: 0 0 0 2px rgba(245, 154, 60, 0.18); }
   select { max-width: 220px; }
-  button { cursor: pointer; padding: 5px 10px; }
-  button.primary { background: #e8862a; border-color: #e8862a; color: #1b1a17; font-weight: 600; }
-  .presets button { margin: 2px 3px 2px 0; }
+  button { cursor: pointer; padding: 6px 12px; }
+  button:hover { border-color: #f59a3c; background: #35322a; }
+  button:active { transform: translateY(1px); }
+  button:focus-visible { outline: 2px solid rgba(245, 154, 60, 0.55); outline-offset: 1px; }
+  button.primary { background: linear-gradient(180deg, #ffb054, #f2903a); border-color: #f59a3c; color: #1b1a17; font-weight: 700; box-shadow: 0 2px 10px rgba(245, 154, 60, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+  button.primary:hover { background: linear-gradient(180deg, #ffb054, #f2903a); filter: brightness(1.06); box-shadow: 0 3px 14px rgba(245, 154, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
+  .presets button { margin: 2px 4px 2px 0; }
   .foot { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
 </style>
 </head>

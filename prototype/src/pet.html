@@ -79,9 +79,10 @@
   /* decision buttons after a session */
   #decide { opacity: 0; pointer-events: none; transition: opacity .4s; }
   .waking #decide { opacity: 1; pointer-events: all; }
-  .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: 1; }
+  .btn rect { fill: rgba(28,24,20,.92); stroke: #f59a3c; stroke-width: 1; transition: fill .15s ease; }
   .btn:hover rect { fill: #f59a3c; }
-  .btn text { fill: #fff; font-size: 9.5px; font-weight: 700; }
+  .btn:active rect { fill: #d9822a; }
+  .btn text { fill: #fff; font-size: 10px; font-weight: 700; transition: fill .15s ease; }
   .btn:hover text { fill: #1b1a17; }
   #btnDone { display: none; }
   .has-task #btnDone { display: inline; }
@@ -140,9 +141,10 @@
   /* control buttons */
   #ctl { opacity: 0; pointer-events: none; transition: opacity .2s; }
   .idle:hover #ctl, .ready:hover #ctl, .focus:hover #ctl, .paused:hover #ctl, .waking:hover #ctl, .break:hover #ctl { opacity: 1; pointer-events: auto; }
-  #ctl .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: 1; }
+  #ctl .btn rect { fill: rgba(28,24,20,.9); stroke: #f59a3c; stroke-width: 1; transition: fill .15s ease; }
   #ctl .btn:hover rect { fill: #f59a3c; }
-  #ctl .btn text { fill: #fff; font-size: 8.5px; font-weight: 700; }
+  #ctl .btn:active rect { fill: #d9822a; }
+  #ctl .btn text { fill: #fff; font-size: 8.5px; font-weight: 700; transition: fill .15s ease; }
   #ctl .btn:hover text { fill: #1b1a17; }
   .compact #ctl { opacity: 1 !important; }
   .compact #ctl .btn rect { x: -22; width: 44px; height: 20px; y: -10; }
@@ -164,12 +166,12 @@
     color: #eee3cc;
     background: rgba(24, 20, 16, 0.96);
     border: 1px solid #f59a3c;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 10px 12px;
     font-size: 12.5px;
-    max-height: 200px;
+    max-height: 210px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(245, 154, 60, 0.08);
     overflow-y: auto;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
   }
   .wiz-card::-webkit-scrollbar { width: 4px; }
   .wiz-card::-webkit-scrollbar-thumb { background: rgba(245, 154, 60, 0.5); border-radius: 2px; }
@@ -198,8 +200,9 @@
     cursor: pointer;
     font-size: 12px;
     line-height: 1;
-    padding: 2px 4px;
-    border-radius: 3px;
+    padding: 4px 7px;
+    border-radius: 6px;
+    transition: color .15s ease, background .15s ease;
   }
   .wiz-back-btn:hover, .wiz-close-btn:hover {
     color: #fff;
@@ -214,24 +217,27 @@
   .wiz-chip {
     background: rgba(45, 39, 32, 0.9);
     border: 1px solid rgba(245, 154, 60, 0.4);
-    border-radius: 4px;
+    border-radius: 6px;
     color: #eee3cc;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     user-select: none;
-    transition: all 0.12s;
+    transition: background 0.13s ease, border-color 0.13s ease, transform 0.05s ease;
   }
   .wiz-chip:hover {
     border-color: #f59a3c;
     background: rgba(245, 154, 60, 0.2);
   }
+  .wiz-chip:active { transform: translateY(1px); }
+  .wiz-chip:focus-visible { outline: 2px solid rgba(245, 154, 60, 0.55); outline-offset: 1px; }
   .wiz-chip.on {
     background: #f59a3c;
     color: #1b1a17;
     border-color: #f59a3c;
     font-weight: 700;
+    box-shadow: 0 2px 8px rgba(245, 154, 60, 0.28);
   }
   .wiz-custom-row {
     display: flex;
@@ -242,15 +248,17 @@
   .wiz-input {
     background: rgba(30, 26, 21, 0.9);
     border: 1px solid rgba(245, 154, 60, 0.4);
-    border-radius: 4px;
+    border-radius: 6px;
     color: #fff;
-    padding: 5px 8px;
+    padding: 6px 9px;
     font-size: 13px;
     outline: none;
     box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .wiz-input:focus {
     border-color: #f59a3c;
+    box-shadow: 0 0 0 2px rgba(245, 154, 60, 0.22);
   }
   .wiz-custom-row input {
     width: 65px;
@@ -259,39 +267,45 @@
     background: rgba(245, 154, 60, 0.2);
     border: 1px solid #f59a3c;
     color: #ffd9a8;
-    border-radius: 4px;
-    padding: 5px 10px;
+    border-radius: 6px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.13s ease, color 0.13s ease, transform 0.05s ease;
   }
   .wiz-btn-sm:hover {
     background: #f59a3c;
     color: #1b1a17;
   }
+  .wiz-btn-sm:active { transform: translateY(1px); }
+  .wiz-btn-sm:focus-visible { outline: 2px solid rgba(245, 154, 60, 0.55); outline-offset: 1px; }
   .wiz-quick-btn {
     width: 100%;
     background: rgba(245, 154, 60, 0.15);
     border: 1px dashed #f59a3c;
     color: #ffd9a8;
-    border-radius: 5px;
-    padding: 7px 10px;
+    border-radius: 8px;
+    padding: 8px 12px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     text-align: center;
-    transition: all 0.12s;
+    transition: all 0.13s ease;
   }
   .wiz-quick-btn:hover {
     background: #f59a3c;
     color: #1b1a17;
     border-style: solid;
+    box-shadow: 0 2px 10px rgba(245, 154, 60, 0.25);
   }
+  .wiz-quick-btn:active { transform: translateY(1px); }
+  .wiz-quick-btn:focus-visible { outline: 2px solid rgba(245, 154, 60, 0.55); outline-offset: 1px; }
   .wiz-task-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    max-height: 100px;
+    max-height: 108px;
     overflow-y: auto;
     margin-bottom: 8px;
     padding-right: 2px;
@@ -304,11 +318,11 @@
     justify-content: space-between;
     background: rgba(45, 39, 32, 0.8);
     border: 1px solid rgba(245, 154, 60, 0.25);
-    border-radius: 4px;
-    padding: 5px 8px;
+    border-radius: 6px;
+    padding: 6px 10px;
     cursor: pointer;
     font-size: 12px;
-    transition: all 0.1s;
+    transition: background 0.12s ease, border-color 0.12s ease;
   }
   .wiz-task-row:hover {
     border-color: #f59a3c;
@@ -370,19 +384,23 @@
   }
   .wiz-btn-primary {
     width: 100%;
-    background: #f59a3c;
+    background: linear-gradient(180deg, #ffb054, #f2903a);
     color: #1b1a17;
     border: 0;
-    border-radius: 5px;
-    padding: 6px 10px;
+    border-radius: 8px;
+    padding: 9px 12px;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12.5px;
     cursor: pointer;
-    transition: filter 0.12s;
+    box-shadow: 0 2px 10px rgba(245, 154, 60, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transition: filter 0.13s ease, box-shadow 0.13s ease, transform 0.05s ease;
   }
   .wiz-btn-primary:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.06);
+    box-shadow: 0 3px 14px rgba(245, 154, 60, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   }
+  .wiz-btn-primary:active { transform: translateY(1px); }
+  .wiz-btn-primary:focus-visible { outline: 2px solid rgba(245, 154, 60, 0.55); outline-offset: 1px; }
 </style>
 </head>
 <body>
