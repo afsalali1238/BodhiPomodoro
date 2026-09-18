@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🧘‍♂️ Bodhi Pomodoro</h1>
-  <p><b>Your personal, pixel-art monk who lives on your desktop, helps you focus, and occasionally shoots lasers at your distractions.</b></p>
+  <p><b>Your personal vector desktop monk who lives on your screen, helps you focus, and occasionally shoots lasers at your distractions.</b></p>
   
   *A highly optimized, transparent desktop pet built with Electron & Vanilla JS.*
 </div>
