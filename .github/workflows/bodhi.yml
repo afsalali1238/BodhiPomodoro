@@ -78,7 +78,7 @@ jobs:
       - name: Report fmt diff
         if: failure() && matrix.os == 'ubuntu-latest'
         run: |
-          DIFF=$(cargo fmt -- --diff 2>&1 | head -c 30000 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/%0A/g')
+          DIFF=$(cargo fmt --check 2>&1 | head -c 30000 | sed -e 's/%/%25/g' -e 's/\r/%0D/g' -e ':a' -e 'N' -e '$!ba' -e 's/\n/%0A/g')
           echo "::error title=Rustfmt diff::$DIFF"
 
       - name: Clippy (warnings denied)
