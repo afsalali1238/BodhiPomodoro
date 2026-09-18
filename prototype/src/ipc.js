@@ -84,11 +84,62 @@ function registerIpc() {
   });
 
   ipcMain.on('save-settings', (_e, s) => {
+    if (!s || typeof s !== 'object') return;
     const settings = storage.getSettings();
-    const moved = s.displayId !== settings.displayId || s.scale !== settings.scale;
-    const autoStartChanged = s.autoStart !== undefined && s.autoStart !== settings.autoStart;
 
-    Object.assign(settings, s);
+    const clean = {};
+    if (s.focusMin !== undefined) {
+      clean.focusMin = Math.max(1, Math.min(240, Math.round(Number(s.focusMin)) || 25));
+    }
+    if (s.breakMin !== undefined) {
+      clean.breakMin = Math.max(1, Math.min(120, Math.round(Number(s.breakMin)) || 5));
+    }
+    if (s.longBreakMin !== undefined) {
+      clean.longBreakMin = Math.max(1, Math.min(180, Math.round(Number(s.longBreakMin)) || 15));
+    }
+    if (s.cyclesBeforeLong !== undefined) {
+      clean.cyclesBeforeLong = Math.max(1, Math.min(12, Math.round(Number(s.cyclesBeforeLong)) || 4));
+    }
+    if (s.laserMax !== undefined) {
+      clean.laserMax = Math.max(0, Math.min(3, Math.round(Number(s.laserMax)) || 0));
+    }
+    if (s.graceSec !== undefined) {
+      clean.graceSec = Math.max(0, Math.min(60, Math.round(Number(s.graceSec)) || 5));
+    }
+    if (s.cooldownSec !== undefined) {
+      clean.cooldownSec = Math.max(5, Math.min(120, Math.round(Number(s.cooldownSec)) || 30));
+    }
+    if (s.awayPauseMin !== undefined) {
+      clean.awayPauseMin = Math.max(1, Math.min(30, Math.round(Number(s.awayPauseMin)) || 3));
+    }
+    if (s.scale !== undefined) {
+      clean.scale = s.scale === 'auto' ? 'auto' : Math.max(0.4, Math.min(3, Number(s.scale) || 1));
+    }
+    if (s.displayId !== undefined) {
+      clean.displayId = s.displayId === null ? null : (Number(s.displayId) || null);
+    }
+    const boolKeys = [
+      'alwaysOnTop', 'walkAcross', 'autoStartBreak', 'autoStartFocus',
+      'sound', 'lasers', 'hideInMeetings', 'hideFullscreen',
+      'breakNudge', 'askTaskOnStart', 'reduceMotion', 'autoStart'
+    ];
+    boolKeys.forEach(k => {
+      if (s[k] !== undefined) clean[k] = Boolean(s[k]);
+    });
+    if (typeof s.reportTime === 'string' && /^\d{2}:\d{2}$/.test(s.reportTime)) {
+      clean.reportTime = s.reportTime;
+    }
+    ['distractList', 'allowList', 'focusApps'].forEach(k => {
+      if (Array.isArray(s[k])) {
+        clean[k] = s[k].map(x => String(x || '').trim().toLowerCase()).filter(Boolean);
+      }
+    });
+
+    const moved = (clean.displayId !== undefined && clean.displayId !== settings.displayId) ||
+                  (clean.scale !== undefined && clean.scale !== settings.scale);
+    const autoStartChanged = clean.autoStart !== undefined && clean.autoStart !== settings.autoStart;
+
+    Object.assign(settings, clean);
     storage.saveSettings();
 
     if (autoStartChanged) {
@@ -151,7 +202,7 @@ function registerIpc() {
       t.doneAt = null;
     }
     if (patch.title) t.title = String(patch.title || '').slice(0, 140);
-    if (patch.estimate) t.estimate = Math.max(1, Math.min(12, Number(patch.estimate)));
+    if (patch.estimate !== undefined) t.estimate = Math.max(1, Math.min(12, Math.round(Number(patch.estimate)) || 1));
     storage.saveTasks();
     windows.pushState(true);
     return tasksDb;
@@ -277,7 +328,8 @@ function registerIpc() {
   });
 
   ipcMain.handle('report:notes', (_e, { date, notes }) => {
-    storage.day(date).notes = notes;
+    if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+    storage.day(date).notes = String(notes || '').slice(0, 5000);
     storage.saveLog();
     return true;
   });

@@ -439,11 +439,6 @@ window.addEventListener('mouseup', () => {
   }
   down = null;
 });
-// control buttons (toggle/tasks/settings)
-svg.addEventListener('click', e => {
-  const ctl = e.target.closest('#ctl .btn');
-  if (ctl && ctl.dataset.act) window.bodhi.petAction(ctl.dataset.act);
-});
 
 svg.addEventListener('dblclick', e => {
   if (e.target.closest('#wizBody')) return;

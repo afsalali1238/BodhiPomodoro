@@ -413,8 +413,9 @@ async function reset() {
   pushState();
 }
 
-function demoWalk() {
-  reset();
+async function demoWalk() {
+  await reset();
+  if (S.phase !== 'idle') return;
   S.demo = true;
   S.sessionMin = null;
   S.sessionApps = [];
