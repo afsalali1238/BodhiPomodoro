@@ -106,7 +106,8 @@ const treeStage = () => {
   return n >= 80 ? 4 : n >= 40 ? 3 : n >= 15 ? 2 : n >= 5 ? 1 : 0;
 };
 
-const BREAK_FOR = { 15: 3, 25: 5, 50: 10, 90: 20 };
+// Canonical focus → break mapping lives in the shared utils module.
+const { BREAK_FOR } = require('./utils');
 /**
  * Computes appropriate break duration for a focus duration in minutes.
  * @param {number} min

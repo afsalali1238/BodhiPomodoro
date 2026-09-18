@@ -1,10 +1,6 @@
 // Start-session panel: time chips, task pick/add, focus apps, strict lasers. Plus Tasks and Today tabs.
-const $ = id => document.getElementById(id);
+const { $, esc, fmt, hm, parseTask, breakFor } = BodhiUtils;
 const B = window.bodhi;
-const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const hm = m => m >= 60 ? `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m` : `${m}m`;
-const BREAK_FOR = { 15: 3, 25: 5, 50: 10, 90: 20 };
 
 const ui = { minutes: 25, taskId: null, apps: new Set(), strict: true, presets: [10, 15, 25, 50, 90] };
 
@@ -32,8 +28,7 @@ function renderTimes() {
   $('times').innerHTML = ui.presets.map(m => `<div class="chip ${m === ui.minutes ? 'on' : ''}" data-min="${m}">${m}</div>`).join('') +
     `<label class="chip custom ${isPreset ? '' : 'on'}"><input id="customMin" type="number" min="1" max="240" placeholder="—" value="${isPreset ? '' : ui.minutes}">m</label>`;
   $('customMin').oninput = e => { const v = Math.round(+e.target.value); if (v >= 1 && v <= 240) { ui.minutes = v; renderTimes(); $('customMin').focus(); const i = $('customMin'); i.setSelectionRange(i.value.length, i.value.length); } };
-  const brk = BREAK_FOR[ui.minutes] || Math.max(3, Math.min(20, Math.round(ui.minutes / 5)));
-  $('breakHint').textContent = `${brk}m break`;
+  $('breakHint').textContent = `${breakFor(ui.minutes)}m break`;
   renderGo();
 }
 $('times').addEventListener('click', e => { const c = e.target.closest('[data-min]'); if (c) { ui.minutes = +c.dataset.min; renderTimes(); } });
@@ -137,10 +132,6 @@ $('nowBtns').addEventListener('click', e => {
 });
 
 // ---------- tasks tab ----------
-function parseTask(text) {
-  const m = text.match(/\s(\d{1,2})\s*(p|x|pomo|poms?|sessions?)\s*$/i);
-  return m ? { title: text.slice(0, m.index).trim(), estimate: +m[1] } : { title: text.trim(), estimate: 1 };
-}
 function renderTasks() {
   const open = db.tasks.filter(t => !t.done);
   const today = new Date().toDateString();

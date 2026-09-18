@@ -68,8 +68,9 @@ python bodhi.py --reset
 # Run CLI standalone (set goal)
 python cli.py
 
-# Test all modules
-python test_modules.py
+# Run the unit test suite (pytest)
+pip install -r requirements-dev.txt
+pytest tests/ -v
 ```
 
 ## 🏗️ Architecture
@@ -126,7 +127,8 @@ bodhi-supervisor/
 ├── monitor.py         # Window/file/git monitoring
 ├── state_manager.py   # State persistence & aggregation
 ├── notifier.py        # Toast + blocking interventions
-├── test_modules.py    # Module verification tests
+├── paths.py           # Shared STATE_FILE path, lock, atomic JSON writer
+├── tests/             # pytest unit tests
 ├── start_bodhi.bat    # Windows quick-start
 ├── start_bodhi.ps1    # PowerShell quick-start
 ├── requirements.txt   # Dependencies

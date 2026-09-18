@@ -1,1 +1,18 @@
-﻿venv/
+# Virtual environments
+venv/
+.venv/
+
+# Secrets — never commit API keys
+.env
+
+# Runtime state (per-user session data, written by the daemon)
+state.json
+
+# Python build artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Test artifacts
+.pytest_cache/
+.coverage

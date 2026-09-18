@@ -1,12 +1,6 @@
-const $ = id => document.getElementById(id);
+const { $, parseTask } = BodhiUtils;
 const T = window.bodhi.tasks;
 let db = { tasks: [], currentTaskId: null };
-
-// "Write report 2p" -> { title: "Write report", estimate: 2 }
-function parse(text) {
-  const m = text.match(/\s(\d{1,2})\s*(p|x|pomo|poms?|sessions?)\s*$/i);
-  return m ? { title: text.slice(0, m.index).trim(), estimate: +m[1] } : { title: text.trim(), estimate: 1 };
-}
 
 function render() {
   const open = db.tasks.filter(t => !t.done);
@@ -23,7 +17,7 @@ function render() {
 
 $('add').addEventListener('keydown', async e => {
   if (e.key !== 'Enter' || !e.target.value.trim()) return;
-  db = await T.add(parse(e.target.value)); e.target.value = ''; render();
+  db = await T.add(parseTask(e.target.value)); e.target.value = ''; render();
 });
 
 let selectedIdx = -1;

@@ -1,10 +1,9 @@
-const $ = id => document.getElementById(id);
+const { $, fmt } = BodhiUtils;
 const nums = ['focusMin', 'breakMin', 'longBreakMin', 'cyclesBeforeLong', 'laserMax', 'graceSec', 'cooldownSec', 'awayPauseMin'];
 const checks = ['alwaysOnTop', 'walkAcross', 'autoStartBreak', 'autoStartFocus', 'sound', 'lasers', 'hideInMeetings', 'hideFullscreen', 'breakNudge', 'askTaskOnStart', 'reduceMotion', 'autoStart'];
 const textareas = ['distractList', 'allowList', 'focusApps'];
 const time = ['reportTime'];
 let loaded = false;
-const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const names = { idle: 'Ready', focus: 'Meditating', waking: 'Awakening', walkingOut: 'Walking out',
   break: 'On a walk', returning: 'Returning', ready: 'Back under the tree' };
 

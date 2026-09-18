@@ -149,7 +149,7 @@ function openSettings() {
   });
 }
 
-function openTasks_(mode = 'manage') {
+function openTasks(mode = 'manage') {
   if (!pet || pet.isDestroyed()) return;
   const pb = pet.getBounds();
   const wa = getDisplay().workArea;
@@ -419,7 +419,7 @@ module.exports = {
   movePetToDisplay,
   smallWindow,
   openSettings,
-  openTasks_,
+  openTasks,
   openLauncher,
   openReport,
   pushState,

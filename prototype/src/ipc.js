@@ -114,7 +114,7 @@ function registerIpc() {
       reset: state.reset,
       demo: state.demoWalk,
       report: () => windows.openReport(),
-      tasks: () => windows.openTasks_('manage'),
+      tasks: () => windows.openTasks('manage'),
       testLaser: () => windows.fireBlast(2, null)
     };
     if (actionMap[a]) actionMap[a]();

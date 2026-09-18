@@ -19,10 +19,11 @@ const NODE_MAIN_FILES = [
   'src/distraction.js'
 ];
 
-// report.js is an isomorphic UMD-style module: required directly by the main
-// process (storage.js/state.js) AND loaded via <script> into report.html as
-// `window.BodhiReport`. It needs both Node and browser globals.
-const ISOMORPHIC_FILES = ['src/report.js'];
+// Isomorphic UMD-style modules: required directly by the main process AND
+// loaded via <script> tags into renderer windows — report.js as
+// `window.BodhiReport`, utils.js as `window.BodhiUtils`. They need both
+// Node and browser globals.
+const ISOMORPHIC_FILES = ['src/report.js', 'src/utils.js'];
 
 const RENDERER_FILES = [
   'src/figures.js',
@@ -71,10 +72,12 @@ module.exports = [
       globals: {
         ...globals.browser,
         // Exposed by preload.js's contextBridge, and by sibling <script> tags
-        // loaded into the same HTML page (figures.js -> window.BodhiArt, etc.).
+        // loaded into the same HTML page (figures.js -> window.BodhiArt,
+        // utils.js -> window.BodhiUtils, etc.).
         bodhi: 'readonly',
         BodhiArt: 'readonly',
-        BodhiReport: 'readonly'
+        BodhiReport: 'readonly',
+        BodhiUtils: 'readonly'
       }
     },
     rules: {

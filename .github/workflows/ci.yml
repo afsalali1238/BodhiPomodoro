@@ -33,3 +33,30 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+  python:
+    name: Python Tests & Lint (bodhi-supervisor)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bodhi-supervisor
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: bodhi-supervisor/requirements*.txt
+
+      - name: Install dependencies
+        # requirements.txt uses sys_platform markers so the Windows-only
+        # packages (win10toast, pygetwindow) are skipped on this runner; the
+        # code imports them behind try/except guards.
+        run: pip install -r requirements-dev.txt
+
+      - name: Run unit tests
+        run: pytest tests/ -v
+
+      - name: Lint
+        run: flake8 .

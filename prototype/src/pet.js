@@ -1,4 +1,4 @@
-const $ = id => document.getElementById(id);
+const { $, fmt, esc: escHtml } = BodhiUtils;
 const A = window.BodhiArt;
 const svg = $('stage');
 
@@ -16,7 +16,6 @@ function setTree(stage) {
   $('treeHost').innerHTML = A.bodhiTree(stage);
 }
 
-const fmt = s => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const clip = (s, n) => s.length > n ? s.slice(0, n - 1) + '…' : s;
 const SIGN = { water: 'drink water', breathe: 'breathe slowly', stretch: 'stand & stretch', eyes: 'look far away',
   coffee: 'coffee break', walk: 'take a walk' };
@@ -28,8 +27,6 @@ let cachedTasks = [];
 let cachedApps = [];
 let currentPhase = 'idle';
 let askTaskOnStart = true;
-
-const escHtml = s => String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 function openWizard(step = 1) {
   if (currentPhase !== 'idle' && currentPhase !== 'ready') return;

@@ -1,4 +1,4 @@
-const $ = id => document.getElementById(id);
+const { $ } = BodhiUtils;
 const RP = window.BodhiReport, API = window.bodhi.report;
 let current = null, md = '', noteT = 0;
 
