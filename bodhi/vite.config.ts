@@ -9,6 +9,8 @@ export default defineConfig({
     port: 1420,
     strictPort: true,
     host: '0.0.0.0',
+    // Sandbox/cloud previews serve from dynamic hosts — allow them.
+    allowedHosts: true,
     watch: { ignored: ['**/src-tauri/**'] }
   },
   envPrefix: ['VITE_', 'TAURI_'],
