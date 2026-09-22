@@ -11,8 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0c0f14;
-      --card-bg: rgba(22, 27, 34, 0.8);
+      --bg: #0b0e14;
+      --card-bg: rgba(20, 24, 33, 0.85);
       --card-border: rgba(255, 255, 255, 0.08);
       --text: #f0f6fc;
       --text-muted: #8b949e;
@@ -21,7 +21,7 @@
       --accent-hover: #f5bc51;
       --green: #3fb950;
       --green-glow: rgba(63, 185, 80, 0.15);
-      --code-bg: #161b22;
+      --code-bg: #141922;
       --blue: #58a6ff;
     }
 
@@ -43,8 +43,8 @@
       overflow-x: hidden;
       min-height: 100vh;
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(229, 169, 60, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 85% 60%, rgba(63, 185, 80, 0.07) 0%, transparent 45%);
+        radial-gradient(circle at 10% 20%, rgba(229, 169, 60, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 90% 50%, rgba(63, 185, 80, 0.06) 0%, transparent 40%);
     }
 
     a {
@@ -58,20 +58,20 @@
     }
 
     .container {
-      max-width: 1120px;
+      max-width: 1160px;
       margin: 0 auto;
       padding: 0 24px;
     }
 
-    /* Navbar */
+    /* Header / Nav */
     header {
-      padding: 20px 0;
+      padding: 18px 0;
       border-bottom: 1px solid var(--card-border);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(12, 15, 20, 0.88);
+      background: rgba(11, 14, 20, 0.9);
     }
 
     .nav-wrap {
@@ -85,7 +85,7 @@
       align-items: center;
       gap: 12px;
       font-weight: 700;
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       color: var(--text);
     }
 
@@ -97,7 +97,7 @@
 
     .nav-links {
       display: flex;
-      gap: 22px;
+      gap: 24px;
       align-items: center;
       font-size: 0.95rem;
       font-weight: 500;
@@ -126,10 +126,20 @@
       background: rgba(255, 255, 255, 0.12);
     }
 
-    /* Hero Section */
+    /* Hero Section (Two-Column Layout) */
     .hero {
-      padding: 70px 0 50px;
-      text-align: center;
+      padding: 60px 0 70px;
+    }
+
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .hero-content {
+      text-align: left;
     }
 
     .badge-pill {
@@ -138,9 +148,9 @@
       gap: 8px;
       padding: 6px 14px;
       border-radius: 999px;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .badge-verified {
@@ -150,10 +160,10 @@
     }
 
     h1 {
-      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-size: clamp(2.3rem, 4vw, 3.4rem);
       font-weight: 800;
       line-height: 1.15;
-      margin-bottom: 20px;
+      margin-bottom: 18px;
       letter-spacing: -0.02em;
     }
 
@@ -164,19 +174,18 @@
     }
 
     .hero-sub {
-      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      font-size: 1.1rem;
       color: var(--text-muted);
-      max-width: 680px;
-      margin: 0 auto 36px;
+      margin-bottom: 28px;
+      line-height: 1.6;
     }
 
     .cta-group {
       display: flex;
-      justify-content: center;
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .btn {
@@ -184,9 +193,9 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      padding: 14px 28px;
+      padding: 13px 26px;
       border-radius: 12px;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -196,15 +205,15 @@
 
     .btn-primary {
       background: linear-gradient(135deg, #f5bc51 0%, #e5a93c 100%);
-      color: #0c0f14;
+      color: #0b0e14;
       box-shadow: 0 4px 20px var(--accent-glow);
     }
 
     .btn-primary:hover {
       background: linear-gradient(135deg, #fed478 0%, #f5bc51 100%);
       transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(229, 169, 60, 0.4);
-      color: #0c0f14;
+      box-shadow: 0 6px 24px rgba(229, 169, 60, 0.4);
+      color: #0b0e14;
     }
 
     .btn-secondary {
@@ -220,14 +229,13 @@
     }
 
     .os-info {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
-      margin-bottom: 40px;
+      margin-bottom: 24px;
     }
 
     .os-info span {
@@ -236,24 +244,119 @@
       gap: 6px;
     }
 
-    /* Hero Showcase Preview */
-    .preview-card {
-      max-width: 860px;
-      margin: 0 auto 50px;
-      border-radius: 18px;
-      overflow: hidden;
+    /* Hero Clone Snippet */
+    .hero-clone {
+      background: var(--code-bg);
       border: 1px solid var(--card-border);
-      background: var(--card-bg);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      border-radius: 10px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 520px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
     }
 
-    .preview-card img {
+    .hero-clone code {
+      color: #7ee787;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .copy-pill {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 500;
+      transition: background 0.15s;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    .copy-pill:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    /* Pet Showcase Frame (Right Column) */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .pet-card {
+      background: linear-gradient(180deg, rgba(25, 30, 42, 0.9) 0%, rgba(15, 18, 25, 0.95) 100%);
+      border: 1px solid rgba(229, 169, 60, 0.3);
+      border-radius: 20px;
+      padding: 24px 20px 18px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(229, 169, 60, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      width: 320px;
+    }
+
+    .pet-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       width: 100%;
-      height: auto;
-      display: block;
+      margin-bottom: 12px;
+      padding: 0 4px;
     }
 
-    /* Section Headers */
+    .pet-tag {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      background: rgba(229, 169, 60, 0.12);
+      padding: 3px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(229, 169, 60, 0.25);
+    }
+
+    .pet-window-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pet-window-controls span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Fixed natural size for the desktop pet GIF so it never blows up */
+    .pet-card img {
+      width: 240px;
+      height: 310px;
+      object-fit: contain;
+      display: block;
+      border-radius: 12px;
+    }
+
+    .pet-caption {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 14px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Section Headings */
     .section-head {
       text-align: center;
       margin-bottom: 44px;
@@ -270,16 +373,15 @@
       font-size: 1.05rem;
     }
 
-    /* Security & Malware-Free Audit Grid */
+    /* Security Audit Section */
     .security-section {
-      padding: 60px 0;
+      padding: 70px 0;
     }
 
     .audit-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
       gap: 20px;
-      margin-top: 30px;
     }
 
     .audit-card {
@@ -310,9 +412,9 @@
       line-height: 1.5;
     }
 
-    /* Features Grid */
+    /* Features Section */
     .features {
-      padding: 60px 0;
+      padding: 70px 0;
     }
 
     .grid {
@@ -351,9 +453,34 @@
       line-height: 1.55;
     }
 
-    /* Terminal & Clone Section */
+    /* Desktop Lasers Showcase */
+    .showcase-banner {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 18px;
+      overflow: hidden;
+      margin: 40px auto 0;
+      max-width: 880px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .showcase-banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .showcase-footer {
+      padding: 16px 20px;
+      background: rgba(0, 0, 0, 0.3);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Clone / Terminal Section */
     .clone-section {
-      padding: 60px 0;
+      padding: 70px 0;
     }
 
     .terminal-window {
@@ -440,9 +567,9 @@
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* Guide / Install & Uninstall Cards */
+    /* Install & Uninstall Guide */
     .guide-section {
-      padding: 60px 0 80px;
+      padding: 70px 0 90px;
     }
 
     .guide-grid {
@@ -486,7 +613,6 @@
       font-size: 0.85rem;
     }
 
-    /* Banner Box */
     .smartscreen-box {
       background: rgba(229, 169, 60, 0.08);
       border: 1px solid rgba(229, 169, 60, 0.25);
@@ -521,8 +647,24 @@
       flex-wrap: wrap;
     }
 
+    @media (max-width: 900px) {
+      .hero-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .hero-content {
+        text-align: center;
+      }
+      .cta-group, .os-info {
+        justify-content: center;
+      }
+      .hero-clone {
+        margin: 0 auto;
+      }
+    }
+
     @media (max-width: 640px) {
-      .hero { padding: 50px 0 35px; }
+      .hero { padding: 40px 0; }
       .code-row { flex-direction: column; align-items: flex-start; gap: 8px; }
       .audit-card { flex-direction: column; }
     }
@@ -553,39 +695,62 @@
   <!-- Hero Section -->
   <main class="container">
     <section class="hero">
-      <div class="badge-pill badge-verified">
-        ✓ 100% Malware-Free &amp; Verified Clean Open-Source Software
-      </div>
-      
-      <h1>Your Zen Desktop Companion &amp; <span>Focus Timer</span></h1>
-      <p class="hero-sub">
-        A peaceful Buddha who meditates under the Bodhi tree on your screen during deep work, gently nudges distractions with screen lasers, and guides mindful breathing breaks.
-      </p>
+      <div class="hero-layout">
+        <!-- Left Column: Content & Actions -->
+        <div class="hero-content">
+          <div class="badge-pill badge-verified">
+            ✓ 100% Malware-Free &amp; Verified Clean Open-Source Software
+          </div>
+          
+          <h1>Your Zen Desktop Companion &amp; <span>Focus Timer</span></h1>
+          <p class="hero-sub">
+            A peaceful Buddha who meditates under the Bodhi tree on your screen during deep work, gently nudges distractions with screen lasers, and guides mindful breathing breaks.
+          </p>
 
-      <div class="cta-group">
-        <a href="https://github.com/afsalali1238/BodhiPomodoro/releases/latest/download/Bodhi.Pomodoro.Setup.0.3.0.exe" class="btn btn-primary" id="downloadBtn">
-          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 3v12"/></svg>
-          Download for Windows (.exe)
-        </a>
-        <a href="#clone" class="btn btn-secondary">
-          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-          Clone from GitHub
-        </a>
-      </div>
+          <div class="cta-group">
+            <a href="https://github.com/afsalali1238/BodhiPomodoro/releases/latest/download/Bodhi.Pomodoro.Setup.0.3.0.exe" class="btn btn-primary" id="downloadBtn">
+              <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 3v12"/></svg>
+              Download for Windows (.exe)
+            </a>
+            <a href="#clone" class="btn btn-secondary">
+              <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              Clone &amp; Run
+            </a>
+          </div>
 
-      <div class="os-info">
-        <span>🪟 Windows 10/11 (64-bit NSIS Setup)</span>
-        <span>•</span>
-        <span>📦 Version 0.3.0 (~76 MB)</span>
-        <span>•</span>
-        <span>⚡ Electron 31 + Vanilla JS</span>
-        <span>•</span>
-        <span>🗑️ 1-Click Clean Uninstall</span>
-      </div>
+          <div class="os-info">
+            <span>🪟 Windows 10/11 (64-bit NSIS Setup)</span>
+            <span>•</span>
+            <span>📦 Version 0.3.0 (~76 MB)</span>
+            <span>•</span>
+            <span>🗑️ 1-Click Clean Uninstall</span>
+          </div>
 
-      <!-- Preview Animation -->
-      <div class="preview-card">
-        <img src="prototype/docs/images/full-loop.gif" alt="Bodhi Pomodoro Animation Loop">
+          <!-- Fast Clone Bar -->
+          <div class="hero-clone">
+            <code>git clone https://github.com/afsalali1238/BodhiPomodoro.git</code>
+            <button class="copy-pill" onclick="copySnippet('git clone https://github.com/afsalali1238/BodhiPomodoro.git', this)">Copy</button>
+          </div>
+        </div>
+
+        <!-- Right Column: Sized Desktop Pet Showcase -->
+        <div class="hero-visual">
+          <div class="pet-card">
+            <div class="pet-card-top">
+              <span class="pet-tag">Desktop Companion</span>
+              <div class="pet-window-controls">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <!-- Natural 240x310 dimensions so it is crisp and never stretched -->
+            <img src="prototype/docs/images/full-loop.gif" alt="Bodhi Pomodoro Meditating and Walking Pet" width="240" height="310">
+            <div class="pet-caption">
+              <span>🧘</span> Floats transparently on your desktop
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -689,6 +854,14 @@
           <div class="card-icon">📊</div>
           <h3>Daily Focus Journal</h3>
           <p>Track your completed cycles, focus minutes, and task history with local daily summaries and exportable Markdown reports.</p>
+        </div>
+      </div>
+
+      <!-- Desktop Lasers In Action -->
+      <div class="showcase-banner">
+        <img src="prototype/docs/images/lasers-desktop.gif" alt="Lasers tracking distraction window on Windows desktop">
+        <div class="showcase-footer">
+          ⚡ Screen-tracking distraction lasers locks onto distracting apps after your configurable grace period.
         </div>
       </div>
     </section>
