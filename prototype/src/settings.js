@@ -1,8 +1,10 @@
 const { $, fmt } = BodhiUtils;
-const nums = ['focusMin', 'breakMin', 'longBreakMin', 'cyclesBeforeLong', 'laserMax', 'graceSec', 'cooldownSec', 'awayPauseMin'];
-const checks = ['alwaysOnTop', 'walkAcross', 'autoStartBreak', 'autoStartFocus', 'sound', 'lasers', 'hideInMeetings', 'hideFullscreen', 'breakNudge', 'askTaskOnStart', 'reduceMotion', 'autoStart'];
+const nums = ['focusMin', 'breakMin', 'longBreakMin', 'cyclesBeforeLong', 'laserMax', 'graceSec', 'cooldownSec', 'awayPauseMin', 'llmEvalInterval'];
+const checks = ['alwaysOnTop', 'walkAcross', 'autoStartBreak', 'autoStartFocus', 'sound', 'lasers', 'hideInMeetings', 'hideFullscreen', 'breakNudge', 'askTaskOnStart', 'reduceMotion', 'autoStart', 'llmEnabled'];
 const textareas = ['distractList', 'allowList', 'focusApps'];
 const time = ['reportTime'];
+const selects = ['llmProvider'];
+const texts = ['llmModel', 'llmApiKey'];
 let loaded = false;
 const names = { idle: 'Ready', focus: 'Meditating', waking: 'Awakening', walkingOut: 'Walking out',
   break: 'On a walk', returning: 'Returning', ready: 'Back under the tree' };
@@ -23,6 +25,8 @@ window.bodhi.on('state', st => {
   checks.forEach(k => $(k).checked = !!s[k]);
   time.forEach(k => $(k).value = s[k]);
   textareas.forEach(k => $(k).value = (s[k] || []).join('\n'));
+  selects.forEach(k => $(k).value = s[k]);
+  texts.forEach(k => $(k).value = s[k]);
   $('scale').value = String(s.scale);
   setTimeout(() => { if (s.displayId != null) $('displayId').value = String(s.displayId); }, 100);
 });
@@ -43,10 +47,16 @@ $('save').onclick = () => {
   checks.forEach(k => s[k] = $(k).checked);
   time.forEach(k => s[k] = $(k).value);
   textareas.forEach(k => s[k] = $(k).value.trim().split('\n').map(x => x.trim()).filter(Boolean));
+  selects.forEach(k => s[k] = $(k).value);
+  texts.forEach(k => s[k] = $(k).value);
   s.scale = $('scale').value === 'auto' ? 'auto' : Number($('scale').value);
   const dispVal = Number($('displayId')?.value);
   if (dispVal) s.displayId = dispVal;
   window.bodhi.saveSettings(s);
   $('save').textContent = 'Saved ✓';
   setTimeout(() => $('save').textContent = 'Save', 1200);
+};
+
+$('testBrain').onclick = () => {
+  window.bodhi.action('testBrain');
 };

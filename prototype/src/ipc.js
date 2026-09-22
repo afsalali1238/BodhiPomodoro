@@ -265,6 +265,22 @@ function registerIpc() {
 
   ipcMain.on('open-launcher', (_e, tab) => windows.openLauncher(tab));
 
+  // Action handler for testBrain and other actions
+  ipcMain.on('action', (_e, a) => {
+    const actions = {
+      testBrain: () => {
+        const brain = require('./brain');
+        const hasBrain = brain.initBrain();
+        if (hasBrain && brain.isAvailable()) {
+          windows.notify('LLM Connected', 'Brain is ready for focus evaluation');
+        } else {
+          windows.notify('LLM Not Available', 'Please check your API key and provider settings');
+        }
+      }
+    };
+    if (actions[a]) actions[a]();
+  });
+
   // Report API
   ipcMain.handle('report:get', (_e, key) => {
     const tasksDb = storage.getTasksDb();

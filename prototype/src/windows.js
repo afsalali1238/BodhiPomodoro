@@ -8,6 +8,9 @@ const storage = require('./storage');
 const state = require('./state');
 const D = require('./distraction');
 
+// Track last window to avoid duplicate activity logs
+let lastWindowKey = '';
+
 const PET_W = 240, PET_H = 310;
 
 /** @type {BrowserWindow|null} */
@@ -292,6 +295,14 @@ function onWindowSample(win) {
   }
   win.dip = dip;
   const proc = String(win.p || '').toLowerCase();
+  
+  // Log activity if window changed
+  const currentKey = `${proc}:${String(win.t || '')}`;
+  if (currentKey !== lastWindowKey && proc && !proc.includes('bodhi')) {
+    lastWindowKey = currentKey;
+    state.logActivity(proc.replace(/\.exe$/, ''), win.t || '');
+  }
+  
   const fullscreen = settings.hideFullscreen && !['explorer', 'searchhost', 'shellexperiencehost', 'lockapp'].includes(proc) &&
     dip.width >= d.bounds.width && dip.height >= d.bounds.height &&
     Math.abs(dip.x - d.bounds.x) < 8 && Math.abs(dip.y - d.bounds.y) < 8;

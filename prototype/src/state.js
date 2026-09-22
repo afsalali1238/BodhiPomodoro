@@ -115,6 +115,40 @@ const { BREAK_FOR } = require('./utils');
  */
 const breakFor = min => BREAK_FOR[min] || Math.max(3, Math.min(20, Math.round(min / 5)));
 
+// LLM Brain integration
+const brain = require('./brain');
+let evalCallback = null;
+let lastEvalTime = 0;
+let activityLog = []; // Recent window activity for LLM context
+
+/**
+ * Set the evaluation callback for LLM pushback.
+ * @param {(msg: string) => void} fn
+ */
+function setEvalCallback(fn) {
+  evalCallback = fn;
+}
+
+/**
+ * Log a window activity change for LLM context.
+ * @param {string} app App name
+ * @param {string} title Window title
+ */
+function logActivity(app, title) {
+  const entry = `${new Date().toLocaleTimeString()} - ${app}: ${title.slice(0, 60)}`;
+  activityLog.push(entry);
+  if (activityLog.length > 50) activityLog.shift(); // Keep last 50 entries
+}
+
+/**
+ * Get recent activity log (last n entries).
+ * @param {number} n
+ * @returns {string[]}
+ */
+function getRecentActivity(n) {
+  return activityLog.slice(-n);
+}
+
 /**
  * Returns focus, short break, and long break durations in milliseconds.
  */
@@ -492,17 +526,35 @@ function tick() {
   }
 
   // Break nudge: still working while he is on break
-  if (S.phase === 'break' && !S.paused && settings.breakNudge && !S.nudged && getSystemIdleTimeCallback) {
-    const idle = getSystemIdleTimeCallback();
-    S.activeStreak = idle < 3 ? (S.activeStreak || 0) + dt : 0;
-    if (S.activeStreak > 90 * 1000) {
-      S.nudged = true;
-      if (notifyCallback) {
-        notifyCallback('You are still working', `He's out on a break — you should be too. ${activityText(S.activity)}.`);
+    if (S.phase === 'break' && !S.paused && settings.breakNudge && !S.nudged && getSystemIdleTimeCallback) {
+      const idle = getSystemIdleTimeCallback();
+      S.activeStreak = idle < 3 ? (S.activeStreak || 0) + dt : 0;
+      if (S.activeStreak > 90 * 1000) {
+        S.nudged = true;
+        if (notifyCallback) {
+          notifyCallback('You are still working', `He's out on a break — you should be too. ${activityText(S.activity)}.`);
+        }
+        pushState();
       }
-      pushState();
     }
-  }
+
+    // LLM evaluation during focus
+    if (S.phase === 'focus' && !S.paused && evalCallback && settings.llmEvalEnabled) {
+      const evalInterval = (settings.llmEvalInterval || 5) * 60 * 1000; // minutes to ms
+      if (now - lastEvalTime >= evalInterval) {
+        lastEvalTime = now;
+        const recentActivity = getRecentActivity(15);
+        if (recentActivity.length > 0) {
+          brain.evaluate(S.activity || storage.getSettings().lastGoal || 'Focus session', recentActivity)
+            .then(result => {
+              if (result !== 'OK' && evalCallback) {
+                evalCallback(result);
+              }
+            })
+            .catch(e => console.error('[brain] Evaluation error:', e.message));
+        }
+      }
+    }
 
   if (onTimerDone && !S.paused && now >= S.endsAt) {
     const cb = onTimerDone;
@@ -629,5 +681,11 @@ module.exports = {
     if (cbs.onConfirmReset) confirmResetCallback = cbs.onConfirmReset;
     if (cbs.isWatcherAvailable) isWatcherAvailableCallback = cbs.isWatcherAvailable;
     if (cbs.getSystemIdleTime) getSystemIdleTimeCallback = cbs.getSystemIdleTime;
-  }
+    if (cbs.onEvalPushback) evalCallback = cbs.onEvalPushback;
+    if (cbs.onActivitySample) windowActivityHandler = cbs.onActivitySample;
+  },
+  // LLM functions
+  initBrain: () => brain.initBrain(),
+  setEvalCallback,
+  getRecentActivity
 };

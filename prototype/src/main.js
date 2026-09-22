@@ -31,6 +31,7 @@ state.setCallbacks({
   onStopBlast: silent => windows.stopBlast(silent),
   onOpenLauncher: tab => windows.openLauncher(tab),
   onOpenReport: dateKey => windows.openReport(dateKey),
+  onEvalPushback: msg => windows.notify('Focus Check', msg),
   onConfirmReset: async () => {
     const res = await dialog.showMessageBox({
       type: 'question',
@@ -54,6 +55,9 @@ registerIpc();
 app.whenReady().then(() => {
   storage.initStorage();
   const settings = storage.getSettings();
+  
+  // Initialize LLM Brain if API key is configured
+  state.initBrain();
 
   state.restoreSession();
   windows.createPet();

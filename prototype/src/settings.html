@@ -97,6 +97,15 @@
         <div class="row"><label for="reportTime">Report time</label><input id="reportTime" type="time" value="18:00"></div>
       </fieldset>
 
+      <fieldset><legend>LLM Assistant (Bodhi AI)</legend>
+        <div class="row"><label for="llmEnabled">Enable LLM focus check</label><input id="llmEnabled" type="checkbox"></div>
+        <div class="row"><label for="llmProvider">Provider</label><select id="llmProvider"><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option></select></div>
+        <div class="row"><label for="llmModel">Model</label><input id="llmModel" type="text" placeholder="e.g. gpt-4o-mini" style="width:220px"></div>
+        <div class="row"><label for="llmApiKey">API Key</label><input id="llmApiKey" type="password" placeholder="sk-..." style="width:220px"></div>
+        <div class="row"><label for="llmEvalInterval">Check interval (minutes)</label><input id="llmEvalInterval" type="number" min="1" max="60" step="1"></div>
+        <div class="foot"><button id="testBrain" type="button" style="font-size:12px;padding:4px 10px">Test connection</button></div>
+      </fieldset>
+
       <fieldset><legend>Lists</legend>
         <div class="row"><label>Distractions (per line)</label><textarea id="distractList" rows="3"></textarea></div>
         <div class="row"><label>Allow list (per line)</label><textarea id="allowList" rows="3"></textarea></div>

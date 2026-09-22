@@ -49,6 +49,11 @@ try {
  * @property {string[]} focusApps
  * @property {{minutes: number, focusApps: string[], strict: boolean}} lastSession
  * @property {boolean} autoStart
+ * @property {string} llmProvider
+ * @property {string} llmModel
+ * @property {string} llmApiKey
+ * @property {boolean} llmEvalEnabled
+ * @property {number} llmEvalInterval
  */
 
 /**
@@ -105,7 +110,13 @@ const DEFAULTS = {
   reduceMotion: false,
   focusApps: [],
   lastSession: { minutes: 25, focusApps: [], strict: true },
-  autoStart: false
+  autoStart: false,
+  // LLM settings
+  llmProvider: 'openai',
+  llmModel: 'gpt-4o-mini',
+  llmApiKey: '',
+  llmEvalEnabled: false,
+  llmEvalInterval: 5
 };
 
 /** @type {BodhiSettings} */
