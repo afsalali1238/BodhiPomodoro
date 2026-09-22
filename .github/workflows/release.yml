@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Build & Release Windows Setup
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    defaults:
+      run:
+        working-directory: prototype
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: prototype/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows NSIS Installer
+        run: npm run dist:win
+
+      - name: Rename binary for clean URL compatibility
+        shell: pwsh
+        run: |
+          if (Test-Path "dist\Bodhi Pomodoro Setup 0.3.0.exe") {
+            Copy-Item "dist\Bodhi Pomodoro Setup 0.3.0.exe" "dist\Bodhi.Pomodoro.Setup.0.3.0.exe"
+          }
+
+      - name: Create Release & Upload Binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            prototype/dist/*.exe
+          name: Bodhi Pomodoro ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
